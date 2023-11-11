@@ -3,13 +3,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:recipe_app/views/admin/admin_login.dart';
+import 'package:recipe_app/views/client/login.dart';
 
 class CookyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color color;
+  final String? currentScreen; // Make the parameter optional
+
   const CookyAppBar({
-    super.key,
+    Key? key,
     required this.color,
-  });
+    this.currentScreen, // Provide a default value or make it nullable
+  }) : super(key: key);
 
   @override
   Size get preferredSize => Size.fromHeight(kToolbarHeight);
@@ -22,7 +27,7 @@ class CookyAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: Padding(
         padding: const EdgeInsets.only(left: 14.0, top: 16, bottom: 14),
         child: SvgPicture.asset(
-          'lib/assets/app_logo.svg',
+          'assets/app_logo.svg',
           width: 200,
           height: 30,
           fit: BoxFit.fill,
@@ -45,6 +50,15 @@ class CookyAppBar extends StatelessWidget implements PreferredSizeWidget {
             } else if (value == 2) {
               // Logout option
               // Implement your logout logic here
+              if (currentScreen == 'client') {
+                // Navigate to login screen
+                Navigator.pushReplacement(
+                    context, MaterialPageRoute(builder: (context) => Login()));
+              } else if (currentScreen == 'admin') {
+                // Navigate to admin login screen
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => AdminLogin()));
+              }
             }
           },
           itemBuilder: (context) => [
@@ -60,6 +74,9 @@ class CookyAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             PopupMenuItem<int>(
+              onTap: () {
+                // Handle tap if needed
+              },
               value: 2,
               child: Row(
                 children: [

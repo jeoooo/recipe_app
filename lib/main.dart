@@ -1,9 +1,11 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
+// ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
+import 'package:recipe_app/views/client/dashboard.dart';
+// ignore: unused_import
+import 'package:recipe_app/views/client/login.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(MainApp());
 }
 
 class MainApp extends StatelessWidget {
@@ -11,10 +13,6 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(),
-      ),
-    );
+    return MaterialApp(home: Login());
   }
 }
