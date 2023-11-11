@@ -5,8 +5,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 
-class RecipeView extends StatelessWidget {
-  const RecipeView({
+class OtherRecipeView extends StatelessWidget {
+  const OtherRecipeView({
     super.key,
   });
 
