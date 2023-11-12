@@ -1,8 +1,8 @@
-// ignore_for_file: prefer_const_constructors, prefer_final_fields, library_private_types_in_public_api, use_key_in_widget_constructors
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_summernote/flutter_summernote.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:file_picker/file_picker.dart';
 
 import 'package:recipe_app/utils/formatTime.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
@@ -21,6 +21,17 @@ class _CreateRecipeState extends State<CreateRecipe> {
   GlobalKey<FlutterSummernoteState> _keyEditor = GlobalKey();
   GlobalKey<FlutterSummernoteState> _keyEditor2 = GlobalKey();
   TimeOfDay? pickedTime;
+  File? selectedFile;
+
+  Future<void> _pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        selectedFile = File(result.files.single.path!);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +68,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       color: Color(0xffCB4036),
                     ),
                   ),
-                  SizedBox(width: 16), // Add space between text and button
+                  SizedBox(width: 16),
                   ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor:
@@ -94,6 +105,28 @@ class _CreateRecipeState extends State<CreateRecipe> {
                     width: 16,
                   ),
                   if (pickedTime != null) Text(formatTime(pickedTime!))
+                ],
+              ),
+              Row(
+                children: [
+                  ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStatePropertyAll(Color(0xffCB4036)),
+                    ),
+                    onPressed: _pickFile,
+                    child: Text(
+                      'Upload File',
+                      style: GoogleFonts.lexend(fontWeight: FontWeight.w400),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      selectedFile?.path ?? 'No file selected',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
               Text(

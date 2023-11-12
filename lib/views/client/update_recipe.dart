@@ -1,5 +1,5 @@
-// ignore_for_file: prefer_const_constructors, prefer_final_fields, library_private_types_in_public_api, use_key_in_widget_constructors
-
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_summernote/flutter_summernote.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,6 +19,17 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
   GlobalKey<FlutterSummernoteState> _keyEditor = GlobalKey();
   GlobalKey<FlutterSummernoteState> _keyEditor2 = GlobalKey();
   TimeOfDay? pickedTime;
+  File? selectedFile;
+
+  Future<void> _pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        selectedFile = File(result.files.single.path!);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +66,7 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
                       color: Color(0xffCB4036),
                     ),
                   ),
-                  SizedBox(width: 16), // Add space between text and button
+                  SizedBox(width: 16),
                   ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor:
@@ -94,6 +105,28 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
                   if (pickedTime != null) Text(formatTime(pickedTime!))
                 ],
               ),
+              Row(
+                children: [
+                  ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStatePropertyAll(Color(0xffCB4036)),
+                    ),
+                    onPressed: _pickFile,
+                    child: Text(
+                      'Upload File',
+                      style: GoogleFonts.lexend(fontWeight: FontWeight.w400),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      selectedFile?.path ?? 'No file selected',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
               Text(
                 'Ingredients',
                 style: GoogleFonts.lexend(
@@ -115,28 +148,34 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
                   Row(
                     children: [
                       FilledButton(
-                          style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStatePropertyAll(Colors.white),
-                          ),
-                          onPressed: () {},
-                          child: Text(
-                            'Cancel Edit',
-                            style: GoogleFonts.lexend(color: Color(0xff757575)),
-                          )),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStatePropertyAll(Colors.white),
+                        ),
+                        onPressed: () {
+                          // Handle cancel edit
+                        },
+                        child: Text(
+                          'Cancel Edit',
+                          style: GoogleFonts.lexend(color: Color(0xff757575)),
+                        ),
+                      ),
                       SizedBox(
                         width: 10,
                       ),
                       FilledButton(
-                          style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStatePropertyAll(Color(0xffCB4036)),
-                          ),
-                          onPressed: () {},
-                          child: Text(
-                            'Save Changes',
-                            style: GoogleFonts.lexend(),
-                          )),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStatePropertyAll(Color(0xffCB4036)),
+                        ),
+                        onPressed: () {
+                          // Handle save changes
+                        },
+                        child: Text(
+                          'Save Changes',
+                          style: GoogleFonts.lexend(),
+                        ),
+                      ),
                     ],
                   )
                 ],

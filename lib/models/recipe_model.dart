@@ -12,7 +12,7 @@ class Recipe {
   String? recipePreparationTime;
   String? ingredients;
   String? procedure;
-  File? image; // Updated to use File type
+  String? image;
 
   Recipe({
     this.id,
@@ -42,7 +42,7 @@ class Recipe {
       recipePreparationTime: json['recipe_preparation_time'],
       ingredients: json['ingredients'],
       procedure: json['procedure'],
-      // Deserialize the image path or URL here if needed
+      image: json['image'],
     );
   }
 
@@ -59,7 +59,7 @@ class Recipe {
       'recipe_preparation_time': recipePreparationTime,
       'ingredients': ingredients,
       'procedure': procedure,
-      // Serialize the image path or URL here if needed
+      'image': image,
     };
   }
 }

@@ -6,9 +6,11 @@ import 'package:recipe_app/views/client/recipe_view.dart';
 
 class RecipeCard extends StatelessWidget {
   final String recipeName;
+  final String image;
   const RecipeCard({
     Key? key,
     required this.recipeName,
+    required this.image,
   }) : super(key: key);
 
   @override
@@ -27,7 +29,8 @@ class RecipeCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(15.0),
-                child: Image.network('https://fakeimg.pl/325x150'),
+                // 'https://fakeimg.pl/325x150'
+                child: Image.network(image),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 12.0),

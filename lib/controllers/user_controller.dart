@@ -1,52 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:recipe_app/models/user_model.dart';
+import 'package:pocketbase/pocketbase.dart';
 import 'package:recipe_app/utils/pocketbase_conn.dart';
 
 class UserController {
-  final pb = PocketBaseUtils.pocketBaseInstance;
+  final PocketBase pb;
 
-  Future<void> createUser({
-    required User user,
+  UserController() : pb = PocketBaseUtils.pocketBaseInstance;
+
+  Future<void> signUpUser({
+    required String username,
+    required String email,
+    required bool emailVisibility,
+    required String password,
+    required String passwordConfirm,
+    required String name,
+    required String role,
   }) async {
     try {
-      final body = user.toJson();
+      if (password == passwordConfirm) {
+        final body = <String, dynamic>{
+          "username": username,
+          "email": email,
+          "emailVisibility": emailVisibility,
+          "password": password,
+          "passwordConfirm": passwordConfirm,
+          "name": name,
+          "role": role,
+        };
 
-      await pb.collection('users').create(body: body);
-
-      // You can handle the 'record' or perform additional actions if needed
+        await pb.collection('users').create(body: body);
+      } else {
+        // Handle password mismatch error
+        throw Exception('Passwords do not match');
+      }
     } catch (e) {
-      // Handle errors appropriately, e.g., show an error message to the user
-      debugPrint('Error creating user: $e');
+      // Handle exceptions here
+      debugPrint("Error: $e");
+      // You can add further error handling or logging here
+      rethrow; // Rethrow the exception if needed
     }
   }
 
-  Future<void> updateUser({
-    required dynamic recordId,
-    User? user,
-  }) async {
-    try {
-      final body = <String, dynamic>{
-        'recordId': recordId,
-        if (user != null) ...user.toJson(),
-      };
-
-      await pb.collection('users').update(recordId, body: body);
-
-      // You can handle the 'record' or perform additional actions if needed
-    } catch (e) {
-      // Handle errors appropriately, e.g., show an error message to the user
-      debugPrint('Error updating user: $e');
-    }
-  }
-
-  Future<void> deleteUser(dynamic recordId) async {
-    try {
-      await pb.collection('users').delete(recordId);
-
-      // You can perform additional actions after successful deletion if needed
-    } catch (e) {
-      // Handle errors appropriately, e.g., show an error message to the user
-      debugPrint('Error deleting user: $e');
-    }
-  }
+  // You can add more methods for user-related operations, such as login, update profile, etc.
 }

@@ -104,7 +104,9 @@ class _DashboardState extends State<Dashboard> {
               Center(
                 child: Column(
                   children: [
-                    RecipeCard(recipeName: 'test'),
+                    RecipeCard(
+                        recipeName: 'test',
+                        image: 'https://fakeimg.pl/325x150'),
                   ],
                 ),
               ),

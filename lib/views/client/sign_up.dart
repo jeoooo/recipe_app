@@ -1,8 +1,10 @@
-// ignore_for_file: prefer_const_constructors, sized_box_for_whitespace
+// ignore_for_file: prefer_const_constructors, sized_box_for_whitespace, non_constant_identifier_names
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pocketbase/pocketbase.dart';
+import 'package:recipe_app/views/client/dashboard.dart';
 import 'package:recipe_app/views/client/login.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
@@ -14,6 +16,12 @@ class SignUp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final pb = PocketBase('http://127.0.0.1:8090');
+    String name = '';
+    String email_address = '';
+    String username = '';
+    String password = '';
+    String confirm_password = '';
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -48,7 +56,7 @@ class SignUp extends StatelessWidget {
               width: 325,
               child: CustomForm(
                   textfieldName: 'Full Name',
-                  hintText: '',
+                  hintText: name,
                   formType: FormType.Normal),
             ),
           ),
@@ -58,7 +66,7 @@ class SignUp extends StatelessWidget {
               width: 325,
               child: CustomForm(
                   textfieldName: 'Email Address',
-                  hintText: '',
+                  hintText: email_address,
                   formType: FormType.Normal),
             ),
           ),
@@ -68,7 +76,7 @@ class SignUp extends StatelessWidget {
               width: 325,
               child: CustomForm(
                   textfieldName: 'Password',
-                  hintText: '',
+                  hintText: password,
                   formType: FormType.Password),
             ),
           ),
@@ -78,7 +86,7 @@ class SignUp extends StatelessWidget {
               width: 325,
               child: CustomForm(
                   textfieldName: 'Confirm Password',
-                  hintText: '',
+                  hintText: confirm_password,
                   formType: FormType.Password),
             ),
           ),
@@ -122,7 +130,15 @@ class SignUp extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(width: 325, child: Button(buttonText: 'Sign up'))
+              Container(
+                  width: 325,
+                  child: Button(
+                    buttonText: 'Sign up',
+                    onPressed: () {
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (context) => Dashboard()));
+                    },
+                  ))
             ],
           ),
           Row(
