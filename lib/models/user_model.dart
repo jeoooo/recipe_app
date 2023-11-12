@@ -1,22 +1,24 @@
+// ignore_for_file: non_constant_identifier_names
+
 class User {
-  int user_id;
-  String username;
-  String email;
-  bool emailVisibility;
-  String password;
-  String passwordConfirm;
-  String name;
-  String role;
+  int? user_id;
+  String? username;
+  String? email;
+  bool? emailVisibility;
+  String? password;
+  String? passwordConfirm;
+  String? name;
+  String? role;
 
   User({
-    required this.user_id,
-    required this.username,
-    required this.email,
-    required this.emailVisibility,
-    required this.password,
-    required this.passwordConfirm,
-    required this.name,
-    required this.role,
+    this.user_id,
+    this.username,
+    this.email,
+    this.emailVisibility,
+    this.password,
+    this.passwordConfirm,
+    this.name,
+    this.role,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {

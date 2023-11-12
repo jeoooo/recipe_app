@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recipe_app/views/client/recipe_view.dart';
@@ -18,6 +20,7 @@ class RecipeCard extends StatelessWidget {
       },
       child: Card(
         elevation: 0,
+        // ignore: sized_box_for_whitespace
         child: Container(
           width: 325, // Set the width of the card to 325 pixels
           child: Column(
