@@ -1,16 +1,16 @@
 class UserModel {
-  String username;
-  String email;
-  bool emailVisibility;
+  String? username;
+  String? email;
+  bool? emailVisibility;
   String password;
   String passwordConfirm;
   String name;
   String role;
 
   UserModel({
-    required this.username,
-    required this.email,
-    required this.emailVisibility,
+    this.username,
+    this.email,
+    this.emailVisibility,
     required this.password,
     required this.passwordConfirm,
     required this.name,

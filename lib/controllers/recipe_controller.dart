@@ -5,7 +5,6 @@ import 'package:pocketbase/pocketbase.dart';
 import 'package:recipe_app/utils/pocketbase_conn.dart';
 import 'package:recipe_app/models/recipe_model.dart';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 
 class RecipeController {
   PocketBase pb = PocketBaseUtils.pocketBaseInstance;
@@ -18,11 +17,10 @@ class RecipeController {
       final body = recipe.toJson();
       // final multipartFile =
       //     http.MultipartFile.fromString('image', file, filename: file);
-      final multipartFile = http.MultipartFile.fromString(
+      final multipartFile = http.MultipartFile.fromBytes(
         'image',
-        file,
+        await File(file).readAsBytes(),
         filename: file,
-        contentType: MediaType('image', 'jpg'),
       );
 
       await pb.collection('recipe').create(body: body, files: [multipartFile]);
@@ -57,14 +55,25 @@ class RecipeController {
     }
   }
 
-  Future<List<Recipe>> getAllRecipes() async {
+  Future<dynamic> getAllRecipes() async {
     try {
-      final records =
-          await pb.collection('recipe').getFullList(sort: '-created');
-      final List<Recipe> recipes = records
-          .map((record) => Recipe.fromJson(record as Map<String, dynamic>))
-          .toList();
-      return recipes;
+      final records = await pb.collection('recipe').getFullList();
+
+      return records;
+    } catch (e) {
+      // Handle errors appropriately, e.g., show an error message to the user
+      debugPrint('Error fetching all recipes: $e');
+      return [];
+    }
+  }
+
+  Future<dynamic> getAllOwnedRecipes(String id) async {
+    try {
+      final records = await pb
+          .collection('recipe')
+          .getFullList(fields: 'recipe_name, image', filter: 'user_id="$id"');
+
+      return records;
     } catch (e) {
       // Handle errors appropriately, e.g., show an error message to the user
       debugPrint('Error fetching all recipes: $e');

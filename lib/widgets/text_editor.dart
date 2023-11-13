@@ -14,6 +14,7 @@ class TextEditor extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16.0), // Adjust the padding as needed
       child: FlutterSummernote(
+        hasAttachment: false,
         height: 200, // Adjust the height as needed
         hint: "Your text here...",
         key: _keyEditor,

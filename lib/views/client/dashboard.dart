@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_typing_uninitialized_variables
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,11 +9,18 @@ import 'package:recipe_app/widgets/recipe_card.dart';
 import '../../widgets/add_recipe_fab.dart';
 
 class Dashboard extends StatefulWidget {
+  final name;
+  final token;
+  final id;
   const Dashboard({
     Key? key,
+    required this.name,
+    required this.token,
+    required this.id,
   }) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _DashboardState createState() => _DashboardState();
 }
 
@@ -33,7 +40,7 @@ class _DashboardState extends State<Dashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hi, Bada Lee!',
+                'Hi, ${widget.name}',
                 style: GoogleFonts.paytoneOne(fontSize: 20),
               ),
               Text(
@@ -114,7 +121,8 @@ class _DashboardState extends State<Dashboard> {
           ),
         ),
       ),
-      floatingActionButton: AddRecipeFAB(currentScreen: 'client'),
+      floatingActionButton:
+          AddRecipeFAB(currentScreen: 'client', id: widget.id),
     );
   }
 }

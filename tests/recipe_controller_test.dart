@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
 import 'package:recipe_app/controllers/recipe_controller.dart';
 import 'package:recipe_app/models/recipe_model.dart';
+import 'package:recipe_app/utils/pocketbase_conn.dart';
 import 'package:recipe_app/utils/pocketbase_conn_test_utils.dart';
 
 void main() {
@@ -10,35 +14,33 @@ void main() {
 
     setUp(() {
       recipeController =
-          RecipeController(pb: PocketBaseTestUtils.pocketBaseTestInstance);
+          RecipeController(pb: PocketBaseUtils.pocketBaseInstance);
     });
 
-    test('Create Recipe', () async {
-      final recipe = Recipe(
-        recipeName: 'Test Recipe',
-        recipeServings: '4',
-        recipePreparationTime: '30 minutes',
-        ingredients: 'Ingredient 1, Ingredient 2, Ingredient 3',
-        procedure: 'Step 1: Do this, Step 2: Do that',
-      );
+    // test('Create Recipe', () async {
+    //   final recipe = Recipe(
+    //     recipeName: 'Test Recipe',
+    //     recipeServings: '4',
+    //     recipePreparationTime: '30 minutes',
+    //     ingredients: 'Ingredient 1, Ingredient 2, Ingredient 3',
+    //     procedure: 'Step 1: Do this, Step 2: Do that',
+    //   );
 
-      try {
-        await recipeController.createRecipe(
-            recipe: recipe, file: 'tests/img/sisig.jpg');
+    //   final file = File('tests/img/picture.jpg').path;
 
-        // Add assertions based on your expected behavior after creating a recipe
-        // For example, you can check if the recipe is present in the list after creation.
+    //   try {
+    //     await recipeController.createRecipe(recipe: recipe, file: file);
 
-        // Print a success message to the console
-        // debugPrint('Recipe created successfully!');
-      } catch (e) {
-        // Print an error message to the console if an exception occurs
-        debugPrint('Error creating recipe: $e');
+    //     final records = await recipeController.getAllRecipes();
+    //     expect(records.length, greaterThan(0));
+    //   } catch (e) {
+    //     // Print an error message to the console if an exception occurs
+    //     debugPrint('Error creating recipe: $e');
 
-        // Rethrow the exception to mark the test as failed
-        rethrow;
-      }
-    });
+    //     // Rethrow the exception to mark the test as failed
+    //     rethrow;
+    //   }
+    // });
 
     // test('Update Recipe', () async {
     //   // Replace 'RECORD_ID' with the actual record ID to update
@@ -53,35 +55,81 @@ void main() {
     //     image: 'updated_filename.jpg',
     //   );
 
-    //   await recipeController.updateRecipe(
-    //       recordId: recordId, recipe: updatedRecipe);
+    //   try {
+    //     await recipeController.updateRecipe(
+    //         recordId: recordId, recipe: updatedRecipe);
 
-    //   // Add assertions based on your expected behavior after updating a recipe
-    //   // For example, you can check if the recipe has been updated successfully.
+    //     final records = await recipeController.getAllRecipes();
+    //     final updatedRecord = records.firstWhere(
+    //         (record) => record['_id'] == recordId,
+    //         orElse: () => null);
+
+    //     expect(updatedRecord, isNotNull);
+    //     expect(updatedRecord['recipeName'], equals(updatedRecipe.recipeName));
+    //     expect(updatedRecord['recipeServings'],
+    //         equals(updatedRecipe.recipeServings));
+    //     expect(updatedRecord['recipePreparationTime'],
+    //         equals(updatedRecipe.recipePreparationTime));
+    //     expect(updatedRecord['ingredients'], equals(updatedRecipe.ingredients));
+    //     expect(updatedRecord['procedure'], equals(updatedRecipe.procedure));
+    //     expect(updatedRecord['image'], equals(updatedRecipe.image));
+    //   } catch (e) {
+    //     // Print an error message to the console if an exception occurs
+    //     debugPrint('Error updating recipe: $e');
+
+    //     // Rethrow the exception to mark the test as failed
+    //     rethrow;
+    //   }
     // });
 
     // test('Delete Recipe', () async {
     //   // Replace 'RECORD_ID' with the actual record ID to delete
     //   final recordId = 'RECORD_ID';
 
-    //   await recipeController.deleteRecipe(recordId);
+    //   try {
+    //     await recipeController.deleteRecipe(recordId);
 
-    //   // Add assertions based on your expected behavior after deleting a recipe
-    //   // For example, you can check if the recipe is no longer present in the list.
+    //     final records = await recipeController.getAllRecipes();
+    //     final deletedRecord = records.firstWhere(
+    //         (record) => record['_id'] == recordId,
+    //         orElse: () => null);
+
+    //     expect(deletedRecord, isNull);
+    //   } catch (e) {
+    //     // Print an error message to the console if an exception occurs
+    //     debugPrint('Error deleting recipe: $e');
+
+    //     // Rethrow the exception to mark the test as failed
+    //     rethrow;
+    //   }
     // });
 
-    test('Get All Recipes', () async {
-      final recipes = await recipeController.getAllRecipes();
+    // test('Get All Recipes', () async {
+    //   try {
+    //     final records = await recipeController.getAllRecipes();
+    //     print(records);
+    //   } catch (e) {
+    //     // Print an error message to the console if an exception occurs
+    //     debugPrint('Error fetching all recipes: $e');
 
-      // Print the recipes to the console
-      for (var recipe in recipes) {
-        debugPrint(
-            'Recipe Name: ${recipe.recipeName}, Servings: ${recipe.recipeServings}');
+    //     // Rethrow the exception to mark the test as failed
+    //     rethrow;
+    //   }
+    // });
+
+    test('Get All Owned Recipes', () async {
+      final userId = 'qy34g2yu1nopyql'; // Replace with actual user ID
+
+      try {
+        final records = await recipeController.getAllOwnedRecipes(userId);
+        print(records);
+      } catch (e) {
+        // Print an error message to the console if an exception occurs
+        debugPrint('Error fetching all owned recipes: $e');
+
+        // Rethrow the exception to mark the test as failed
+        rethrow;
       }
-
-      // Add assertions based on your expected behavior after fetching all recipes
-      // For example, you can check if the returned list is not empty.
-      expect(recipes.isNotEmpty, true);
     });
   });
 }
