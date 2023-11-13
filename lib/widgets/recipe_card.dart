@@ -5,10 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:recipe_app/views/client/recipe_view.dart';
 
 class RecipeCard extends StatelessWidget {
+  final id;
   final String recipeName;
   final String image;
   const RecipeCard({
     Key? key,
+    required this.id,
     required this.recipeName,
     required this.image,
   }) : super(key: key);

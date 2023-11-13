@@ -3,12 +3,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:recipe_app/views/client/update_recipe.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 
 class OtherRecipeView extends StatelessWidget {
-  const OtherRecipeView({
-    super.key,
-  });
+  final name;
+  final token;
+  final id;
+  const OtherRecipeView(
+      {super.key, required this.name, required this.token, required this.id});
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +123,9 @@ class OtherRecipeView extends StatelessWidget {
                   icon: Icon(Icons.edit),
                   onPressed: () {
                     // Add your logic for the first button
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            UpdateRecipe(id: id, name: name, token: token));
                   },
                   label: Text(
                     'Edit',

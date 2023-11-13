@@ -1,24 +1,42 @@
+// ignore_for_file: prefer_const_constructors
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_summernote/flutter_summernote.dart';
+
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/utils/formatTime.dart';
+import 'package:file_picker/file_picker.dart';
+
+import 'package:recipe_app/utils/pocketbase_conn.dart';
+import 'package:recipe_app/views/client/dashboard.dart';
+import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
-import 'package:recipe_app/widgets/text_editor.dart';
+import 'package:http/http.dart' as http;
 
 class UpdateRecipe extends StatefulWidget {
-  const UpdateRecipe({Key? key});
+  final id;
+  final name;
+  final token;
+  // ignore: use_key_in_widget_constructors
+  const UpdateRecipe({
+    Key? key,
+    required this.id,
+    required this.name,
+    required this.token,
+  });
 
   @override
+  // ignore: library_private_types_in_public_api
   _UpdateRecipeState createState() => _UpdateRecipeState();
 }
 
 class _UpdateRecipeState extends State<UpdateRecipe> {
-  GlobalKey<FlutterSummernoteState> _keyEditor = GlobalKey();
-  GlobalKey<FlutterSummernoteState> _keyEditor2 = GlobalKey();
-  TimeOfDay? pickedTime;
+  // Declare controllers as instance variables
+  TextEditingController recipeNameController = TextEditingController();
+  TextEditingController servingsController = TextEditingController();
+  TextEditingController preparationTimeController = TextEditingController();
+  TextEditingController ingredientController = TextEditingController();
+  TextEditingController procedureController = TextEditingController();
+
   File? selectedFile;
 
   Future<void> _pickFile() async {
@@ -33,6 +51,8 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
 
   @override
   Widget build(BuildContext context) {
+    final pb = PocketBaseUtils.pocketBaseInstance;
+
     return Scaffold(
       appBar: CookyAppBar(color: Color(0xffCB4036)),
       body: SingleChildScrollView(
@@ -43,7 +63,7 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
             children: [
               CustomForm(
                 textfieldName: 'Recipe Name',
-                hintText: '',
+                controller: recipeNameController,
                 formType: FormType.Normal,
               ),
               SizedBox(
@@ -51,59 +71,19 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
               ),
               CustomForm(
                 textfieldName: 'Number of Servings',
-                hintText: '',
+                controller: servingsController,
                 formType: FormType.NumberInput,
               ),
               SizedBox(
                 height: 10,
               ),
-              Row(
-                children: [
-                  Text(
-                    'Preparation Time: ',
-                    style: GoogleFonts.lexend(
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xffCB4036),
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStatePropertyAll(Color(0xffCB4036)),
-                    ),
-                    onPressed: () async {
-                      final TimeOfDay? newPickedTime = await showTimePicker(
-                        context: context,
-                        initialTime: pickedTime ?? TimeOfDay.now(),
-                        initialEntryMode: TimePickerEntryMode.inputOnly,
-                        builder: (BuildContext context, Widget? child) {
-                          return MediaQuery(
-                            data: MediaQuery.of(context).copyWith(
-                              alwaysUse24HourFormat: false,
-                            ),
-                            child: child!,
-                          );
-                        },
-                      );
-
-                      if (newPickedTime != null) {
-                        setState(() {
-                          pickedTime = newPickedTime;
-                        });
-                        debugPrint('Selected Time: ${formatTime(pickedTime!)}');
-                      }
-                    },
-                    child: Text(
-                      'Pick Time',
-                      style: GoogleFonts.lexend(fontWeight: FontWeight.w400),
-                    ),
-                  ),
-                  SizedBox(
-                    width: 16,
-                  ),
-                  if (pickedTime != null) Text(formatTime(pickedTime!))
-                ],
+              CustomForm(
+                textfieldName: 'Preparation Time',
+                controller: preparationTimeController,
+                formType: FormType.Normal,
+              ),
+              SizedBox(
+                height: 10,
               ),
               Row(
                 children: [
@@ -114,7 +94,7 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
                     ),
                     onPressed: _pickFile,
                     child: Text(
-                      'Upload File',
+                      'Upload Recipe Image',
                       style: GoogleFonts.lexend(fontWeight: FontWeight.w400),
                     ),
                   ),
@@ -127,58 +107,52 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
                   ),
                 ],
               ),
-              Text(
-                'Ingredients',
-                style: GoogleFonts.lexend(
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xffCB4036),
-                ),
+              SizedBox(
+                height: 10,
               ),
-              TextEditor(keyEditor: _keyEditor),
-              Text(
-                'Procedure',
-                style: GoogleFonts.lexend(
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xffCB4036),
-                ),
+              CustomForm(
+                textfieldName: 'Ingredients',
+                controller: ingredientController,
+                formType: FormType.MultiLineText,
               ),
-              TextEditor(keyEditor: _keyEditor2),
-              Column(
-                children: [
-                  Row(
-                    children: [
-                      FilledButton(
-                        style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStatePropertyAll(Colors.white),
-                        ),
-                        onPressed: () {
-                          // Handle cancel edit
-                        },
-                        child: Text(
-                          'Cancel Edit',
-                          style: GoogleFonts.lexend(color: Color(0xff757575)),
-                        ),
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      FilledButton(
-                        style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStatePropertyAll(Color(0xffCB4036)),
-                        ),
-                        onPressed: () {
-                          // Handle save changes
-                        },
-                        child: Text(
-                          'Save Changes',
-                          style: GoogleFonts.lexend(),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
+              SizedBox(
+                height: 10,
+              ),
+              CustomForm(
+                textfieldName: 'Procedure',
+                controller: procedureController,
+                formType: FormType.MultiLineText,
+              ),
+              Button(
+                onPressed: () async {
+                  final body = <String, dynamic>{
+                    "user_id": widget.id,
+                    "recipe_name": recipeNameController.text,
+                    "recipe_servings": servingsController.text,
+                    "recipe_preparation_time": preparationTimeController.text,
+                    "ingredients": ingredientController.text,
+                    "procedure": procedureController.text
+                  };
+
+                  final multipartFile = http.MultipartFile.fromBytes(
+                      'image', await File(selectedFile!.path).readAsBytes(),
+                      filename: selectedFile!.path);
+                  await pb
+                      .collection('recipe')
+                      .create(body: body, files: [multipartFile]);
+
+                  // ignore: use_build_context_synchronously
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Dashboard(
+                          name: widget.name,
+                          token: widget.token,
+                          id: widget.id),
+                    ),
+                  );
+                },
+                buttonText: 'Publish Recipe',
               ),
             ],
           ),

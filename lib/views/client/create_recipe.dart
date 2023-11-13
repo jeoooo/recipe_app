@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables
 import 'dart:io';
 import 'package:flutter/material.dart';
 
@@ -14,11 +14,11 @@ import 'package:http/http.dart' as http;
 
 class CreateRecipe extends StatefulWidget {
   final id;
+  final name;
+  final token;
   // ignore: use_key_in_widget_constructors
-  const CreateRecipe({
-    Key? key,
-    required this.id,
-  });
+  const CreateRecipe(
+      {Key? key, required this.id, required this.name, required this.token});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -140,8 +140,10 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          Dashboard(name: 'xd', token: 'xd', id: 'xd'),
+                      builder: (context) => Dashboard(
+                          name: widget.name,
+                          token: widget.token,
+                          id: widget.id),
                     ),
                   );
                 },

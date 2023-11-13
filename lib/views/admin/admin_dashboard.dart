@@ -112,6 +112,7 @@ class _DashboardState extends State<AdminDashboard> {
                 child: Column(
                   children: [
                     RecipeCard(
+                        id: 'id',
                         recipeName: 'test',
                         image: 'https://fakeimg.pl/325x150'),
                   ],
@@ -121,8 +122,11 @@ class _DashboardState extends State<AdminDashboard> {
           ),
         ),
       ),
-      floatingActionButton:
-          AddRecipeFAB(currentScreen: 'client', id: widget.id),
+      floatingActionButton: AddRecipeFAB(
+          currentScreen: 'client',
+          id: widget.id,
+          name: widget.name,
+          token: widget.token),
     );
   }
 }
