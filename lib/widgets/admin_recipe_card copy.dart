@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recipe_app/views/admin/admn_recipe_view.dart';
 
-class RecipeCard extends StatelessWidget {
+class AdminRecipeCard extends StatelessWidget {
   final id;
   final name;
   final token;
   final auth_id;
   final String recipeName;
   final String image;
-  const RecipeCard(
+  const AdminRecipeCard(
       {Key? key,
       required this.id,
       required this.recipeName,

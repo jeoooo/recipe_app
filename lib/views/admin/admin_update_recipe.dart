@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables
 import 'dart:io';
 import 'package:flutter/material.dart';
 
@@ -6,7 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
 
 import 'package:recipe_app/utils/pocketbase_conn.dart';
-import 'package:recipe_app/views/client/dashboard.dart';
+import 'package:recipe_app/views/admin/admin_dashboard.dart';
+
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
@@ -14,10 +15,14 @@ import 'package:http/http.dart' as http;
 
 class AdminUpdateRecipe extends StatefulWidget {
   final id;
+  final name;
+  final token;
   // ignore: use_key_in_widget_constructors
   const AdminUpdateRecipe({
     Key? key,
     required this.id,
+    required this.name,
+    required this.token,
   });
 
   @override
@@ -134,14 +139,16 @@ class _AdminUpdateRecipeState extends State<AdminUpdateRecipe> {
                       filename: selectedFile!.path);
                   await pb
                       .collection('recipe')
-                      .create(body: body, files: [multipartFile]);
+                      .update(widget.id, body: body, files: [multipartFile]);
 
                   // ignore: use_build_context_synchronously
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          Dashboard(name: 'xd', token: 'xd', id: 'xd'),
+                      builder: (context) => AdminDashboard(
+                          name: widget.name,
+                          token: widget.token,
+                          id: widget.id),
                     ),
                   );
                 },

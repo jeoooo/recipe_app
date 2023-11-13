@@ -139,7 +139,7 @@ class AdminSignUp extends StatelessWidget {
                             password: passwordController.text,
                             passwordConfirm: confirmPasswordController.text,
                             name: nameController.text,
-                            role: 'client');
+                            role: 'admin');
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(

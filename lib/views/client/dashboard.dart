@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:recipe_app/utils/pocketbase_conn_test_utils.dart';
 
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/recipe_card.dart';
@@ -26,6 +27,23 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   bool ownRecipesSelected = true;
+
+  List<dynamic> recipeList = []; // Store the list of recipes
+  Future<void> _fetchRecipes() async {
+    try {
+      // Fetch all records from the 'recipe' collection and sort by the 'created' field in descending order
+      final records = await PocketBaseTestUtils.pocketBaseTestInstance
+          .collection('recipe')
+          .getFullList(sort: '-created');
+
+      setState(() {
+        recipeList = records;
+      });
+    } catch (e) {
+      // Handle any errors that might occur during the fetch
+      print("Error fetching recipes: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,15 +126,23 @@ class _DashboardState extends State<Dashboard> {
                   ],
                 ),
               ),
-              Center(
-                child: Column(
-                  children: [
-                    RecipeCard(
-                        id: 'id',
-                        recipeName: 'test',
-                        image: 'https://fakeimg.pl/325x150'),
-                  ],
-                ),
+              ListView.builder(
+                itemCount: recipeList.length,
+                itemBuilder: (context, index) {
+                  return Center(
+                    child: Column(
+                      children: [
+                        RecipeCard(
+                            token: widget.token,
+                            name: widget.name,
+                            auth_id: widget.id,
+                            id: recipeList[index]['id'],
+                            recipeName: recipeList[index]['recipe_name'],
+                            image: recipeList[index]['image']),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           ),

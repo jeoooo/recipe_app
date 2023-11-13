@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables
 import 'dart:io';
 import 'package:flutter/material.dart';
 
@@ -6,7 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
 
 import 'package:recipe_app/utils/pocketbase_conn.dart';
-import 'package:recipe_app/views/client/dashboard.dart';
+import 'package:recipe_app/views/admin/admin_dashboard.dart';
+
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
@@ -140,7 +141,7 @@ class _AdminCreateRecipeState extends State<AdminCreateRecipe> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Dashboard(
+                      builder: (context) => AdminDashboard(
                           name: widget.name,
                           token: widget.token,
                           id: widget.id),

@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables
 import 'dart:io';
 import 'package:flutter/material.dart';
 
@@ -126,7 +126,6 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
               Button(
                 onPressed: () async {
                   final body = <String, dynamic>{
-                    "user_id": widget.id,
                     "recipe_name": recipeNameController.text,
                     "recipe_servings": servingsController.text,
                     "recipe_preparation_time": preparationTimeController.text,
@@ -139,7 +138,7 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
                       filename: selectedFile!.path);
                   await pb
                       .collection('recipe')
-                      .create(body: body, files: [multipartFile]);
+                      .update(widget.id, body: body, files: [multipartFile]);
 
                   // ignore: use_build_context_synchronously
                   Navigator.pushReplacement(
