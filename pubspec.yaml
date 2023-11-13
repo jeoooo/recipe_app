@@ -9,11 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_summernote: ^1.1.1
   flutter_svg: ^2.0.9
   google_fonts: ^6.1.0
-  html_editor_enhanced: ^2.5.1
-  supabase_flutter: ^1.10.25
   flutter_native_splash: ^2.3.5
   flutter_launcher_icons: ^0.13.1
   pocketbase: ^0.16.0
