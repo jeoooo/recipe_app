@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:recipe_app/utils/pocketbase_conn.dart';
 import 'package:recipe_app/views/admin/admin_login.dart';
 import 'package:recipe_app/views/client/login.dart';
 
@@ -44,14 +45,16 @@ class CookyAppBar extends StatelessWidget implements PreferredSizeWidget {
           icon: Icon(Icons.more_vert),
           onSelected: (value) {
             // Handle menu item selection
+            // if (value == 1) {
+            //   // Dark mode option
+            //   // Implement your dark mode logic here
+            // }
             if (value == 1) {
-              // Dark mode option
-              // Implement your dark mode logic here
-            } else if (value == 2) {
               // Logout option
               // Implement your logout logic here
               if (currentScreen == 'client') {
                 // Navigate to login screen
+                PocketBaseUtils.pocketBaseInstance.authStore.clear();
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (context) => Login()));
               } else if (currentScreen == 'admin') {
@@ -62,17 +65,17 @@ class CookyAppBar extends StatelessWidget implements PreferredSizeWidget {
             }
           },
           itemBuilder: (context) => [
-            PopupMenuItem<int>(
-              value: 1,
-              child: Row(
-                children: [
-                  Icon(Icons.dark_mode, color: Colors.black),
-                  SizedBox(width: 8),
-                  Text('Dark Mode',
-                      style: GoogleFonts.lexend(fontWeight: FontWeight.w400)),
-                ],
-              ),
-            ),
+            // PopupMenuItem<int>(
+            //   value: 1,
+            //   child: Row(
+            //     children: [
+            //       Icon(Icons.dark_mode, color: Colors.black),
+            //       SizedBox(width: 8),
+            //       Text('Dark Mode',
+            //           style: GoogleFonts.lexend(fontWeight: FontWeight.w400)),
+            //     ],
+            //   ),
+            // ),
             PopupMenuItem<int>(
               onTap: () {
                 // Handle tap if needed

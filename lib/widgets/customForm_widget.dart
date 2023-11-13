@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -5,24 +7,28 @@ enum FormType {
   Normal,
   Password,
   NumberInput,
+  MultiLineText, // Added MultiLineText form type
 }
 
 class CustomForm extends StatefulWidget {
   final String textfieldName;
-  final String hintText;
+  final String? hintText;
   final FormType formType;
   final VoidCallback? onPressed;
   final bool showError;
   final String errorMessage;
 
+  final TextEditingController? controller;
+
   const CustomForm({
     Key? key,
     required this.textfieldName,
-    required this.hintText,
+    this.hintText,
     required this.formType,
     this.onPressed,
     this.showError = false,
     this.errorMessage = '',
+    this.controller,
   }) : super(key: key);
 
   @override
@@ -30,6 +36,14 @@ class CustomForm extends StatefulWidget {
 }
 
 class _CustomFormState extends State<CustomForm> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+  }
+
   bool _obscureText = true;
 
   @override
@@ -45,23 +59,32 @@ class _CustomFormState extends State<CustomForm> {
           ),
         ),
         SizedBox(height: 6),
-        if (widget.formType == FormType.Normal ||
-            widget.formType == FormType.NumberInput)
-          _buildTextField(),
-        if (widget.formType == FormType.Password) _buildPasswordField(),
+        _buildFormInput(),
         if (widget.showError) _buildErrorText(),
       ],
     );
   }
 
+  Widget _buildFormInput() {
+    switch (widget.formType) {
+      case FormType.Normal:
+      case FormType.MultiLineText: // Added MultiLineText case
+        return _buildTextField();
+      case FormType.Password:
+        return _buildPasswordField();
+      case FormType.NumberInput:
+        return _buildTextField(); // Use the same text field for number input
+    }
+  }
+
   Widget _buildTextField() {
     return SizedBox(
-      height: 40,
+      height: widget.formType == FormType.MultiLineText ? 80 : 40,
       child: TextField(
+        controller: _controller,
         autocorrect: false,
         enableSuggestions: false,
-        obscureText:
-            widget.formType == FormType.Password ? _obscureText : false,
+        maxLines: widget.formType == FormType.MultiLineText ? null : 1,
         keyboardType: widget.formType == FormType.NumberInput
             ? TextInputType.number
             : TextInputType.text,
@@ -74,6 +97,7 @@ class _CustomFormState extends State<CustomForm> {
     return SizedBox(
       height: 40,
       child: TextField(
+        controller: _controller,
         autocorrect: false,
         enableSuggestions: false,
         obscureText: _obscureText,
@@ -88,7 +112,6 @@ class _CustomFormState extends State<CustomForm> {
                 _obscureText = !_obscureText;
               });
 
-              // Invoke the callback if it's not null
               if (widget.onPressed != null) {
                 widget.onPressed!();
               }
@@ -100,7 +123,7 @@ class _CustomFormState extends State<CustomForm> {
   }
 
   Widget _buildErrorText() {
-    return Container(
+    return SizedBox(
       width: 325,
       child: Text(
         widget.errorMessage,

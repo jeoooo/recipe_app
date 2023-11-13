@@ -1,25 +1,17 @@
-// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables, non_constant_identifier_names
+// ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/utils/pocketbase_conn.dart';
-import 'package:recipe_app/views/client/dashboard.dart';
-
-import 'package:recipe_app/widgets/CustomAlertDialog.dart';
+import 'package:recipe_app/views/client/update_recipe.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 
-class RecipeView extends StatelessWidget {
+class OtherRecipeView extends StatelessWidget {
   final name;
   final token;
-  final auth_id;
   final id;
-  const RecipeView(
-      {super.key,
-      required this.id,
-      required this.auth_id,
-      required this.name,
-      required this.token});
+  const OtherRecipeView(
+      {super.key, required this.name, required this.token, required this.id});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +46,7 @@ class RecipeView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      ElevatedButton.icon(
+                      FilledButton.icon(
                         style: ButtonStyle(
                           backgroundColor:
                               MaterialStatePropertyAll(Colors.transparent),
@@ -131,6 +123,9 @@ class RecipeView extends StatelessWidget {
                   icon: Icon(Icons.edit),
                   onPressed: () {
                     // Add your logic for the first button
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            UpdateRecipe(id: id, name: name, token: token));
                   },
                   label: Text(
                     'Edit',
@@ -140,65 +135,14 @@ class RecipeView extends StatelessWidget {
                 SizedBox(width: 16),
                 ElevatedButton.icon(
                   icon: Icon(Icons.delete),
-                  onPressed: () async {
-                    // Show a confirmation dialog
-                    bool? confirmDelete = await showDialog<bool>(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('Confirm Deletion'),
-                          content: Text(
-                              'Are you sure you want to delete this item?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(
-                                    false); // Close the dialog and return false
-                              },
-                              child: Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(
-                                    true); // Close the dialog and return true
-                              },
-                              child: Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-
-                    // Proceed with the delete operation if the user confirmed
-                    if (confirmDelete ?? false) {
-                      PocketBaseUtils.pocketBaseInstance
-                          .collection('recipe')
-                          .delete(id);
-
-                      // Optionally show another dialog or perform other actions after deletion
-                      // ignore: use_build_context_synchronously
-                      CustomAlertDialog.show(
-                        context: context,
-                        title: 'Deletion Successful',
-                        message: 'The item has been deleted.',
-                      );
-
-                      // Optionally navigate to another screen or perform other actions
-                      // ignore: use_build_context_synchronously
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Dashboard(
-                                    id: auth_id,
-                                    name: name,
-                                    token: token,
-                                  )));
-                    } else {
-                      // User canceled the delete operation, do nothing or perform additional actions
-                    }
+                  onPressed: () {
+                    // Add your logic for the first button
                   },
-                  label: Text('Delete'),
-                )
+                  label: Text(
+                    'Edit',
+                    style: GoogleFonts.lexend(),
+                  ),
+                ),
               ],
             ),
             Text(

@@ -1,16 +1,24 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_typing_uninitialized_variables
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/widgets/add_recipe_fab.dart';
+import 'package:recipe_app/utils/pocketbase_conn_test_utils.dart';
 
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/recipe_card.dart';
 
+import '../../widgets/add_recipe_fab.dart';
+
 class AdminDashboard extends StatefulWidget {
+  final name;
+  final token;
+  final id;
   const AdminDashboard({
-    super.key,
-  });
+    Key? key,
+    required this.name,
+    required this.token,
+    required this.id,
+  }) : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -20,12 +28,29 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   bool ownRecipesSelected = true;
 
+  List<dynamic> recipeList = []; // Store the list of recipes
+  Future<void> _fetchRecipes() async {
+    try {
+      // Fetch all records from the 'recipe' collection and sort by the 'created' field in descending order
+      final records = await PocketBaseTestUtils.pocketBaseTestInstance
+          .collection('recipe')
+          .getFullList(sort: '-created');
+
+      setState(() {
+        recipeList = records;
+      });
+    } catch (e) {
+      // Handle any errors that might occur during the fetch
+      print("Error fetching recipes: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar:
-          const CookyAppBar(color: Color(0xffCB4036), currentScreen: 'client'),
+          const CookyAppBar(color: Color(0xffCB4036), currentScreen: 'admin'),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -33,7 +58,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hi, Bada Lee!',
+                'Hi, ${widget.name}',
                 style: GoogleFonts.paytoneOne(fontSize: 20),
               ),
               Text(
@@ -101,18 +126,33 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ],
                 ),
               ),
-              Center(
-                child: Column(
-                  children: [
-                    RecipeCard(recipeName: 'test'),
-                  ],
-                ),
+              ListView.builder(
+                itemCount: recipeList.length,
+                itemBuilder: (context, index) {
+                  return Center(
+                    child: Column(
+                      children: [
+                        RecipeCard(
+                            auth_id: widget.id,
+                            name: widget.name,
+                            token: widget.token,
+                            id: recipeList[index]['id'],
+                            recipeName: recipeList[index]['recipe_name'],
+                            image: recipeList[index]['image']),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           ),
         ),
       ),
-      floatingActionButton: AddRecipeFAB(currentScreen: 'admin'),
+      floatingActionButton: AddRecipeFAB(
+          currentScreen: 'admin',
+          id: widget.id,
+          name: widget.name,
+          token: widget.token),
     );
   }
 }

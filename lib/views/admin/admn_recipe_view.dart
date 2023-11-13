@@ -4,17 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recipe_app/utils/pocketbase_conn.dart';
-import 'package:recipe_app/views/client/dashboard.dart';
-
+import 'package:recipe_app/views/admin/admin_dashboard.dart';
 import 'package:recipe_app/widgets/CustomAlertDialog.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 
-class RecipeView extends StatelessWidget {
+class AdminRecipeView extends StatelessWidget {
   final name;
   final token;
   final auth_id;
   final id;
-  const RecipeView(
+  const AdminRecipeView(
       {super.key,
       required this.id,
       required this.auth_id,
@@ -188,7 +187,7 @@ class RecipeView extends StatelessWidget {
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => Dashboard(
+                              builder: (context) => AdminDashboard(
                                     id: auth_id,
                                     name: name,
                                     token: token,
