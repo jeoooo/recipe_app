@@ -29,6 +29,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
   bool ownRecipesSelected = true;
 
   List<dynamic> recipeList = []; // Store the list of recipes
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecipes();
+  }
+
   Future<void> _fetchRecipes() async {
     try {
       // Fetch all records from the 'recipe' collection and sort by the 'created' field in descending order
@@ -41,7 +48,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       });
     } catch (e) {
       // Handle any errors that might occur during the fetch
-      print("Error fetching recipes: $e");
+      debugPrint("Error fetching recipes: $e");
     }
   }
 
@@ -127,6 +134,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 ),
               ),
               ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: recipeList.length,
                 itemBuilder: (context, index) {
                   return Center(
