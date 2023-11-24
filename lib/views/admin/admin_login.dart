@@ -3,9 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/auth/auth.dart';
+
 import 'package:recipe_app/views/admin/admin_dashboard.dart';
 import 'package:recipe_app/views/admin/admin_sign_up.dart';
+import 'package:recipe_app/views/client/login.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
 
@@ -58,18 +59,12 @@ class AdminLogin extends StatelessWidget {
                 child: Button(
                   buttonText: 'Log In',
                   onPressed: () async {
-                    final authResult = await authenticateUser(
-                        'http://10.0.2.2:8090',
-                        emailController.text,
-                        passwordController.text);
                     // ignore: use_build_context_synchronously
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => AdminDashboard(
-                          name: authResult?.name,
-                          token: authResult?.token,
-                          id: authResult?.id,
+                          name: "authResult?.name",
                         ),
                       ),
                     );
@@ -113,7 +108,7 @@ class AdminLogin extends StatelessWidget {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AdminLogin(),
+                      builder: (context) => Login(),
                     ),
                   );
                 },
@@ -124,7 +119,7 @@ class AdminLogin extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Login as admin',
+                  'Login as client',
                   style: GoogleFonts.paytoneOne(
                     fontWeight: FontWeight.w400,
                     decoration: TextDecoration.underline,

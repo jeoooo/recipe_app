@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "277706474592",
+    "firebase_url": "https://recipe-app-782da-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "recipe-app-782da",
+    "storage_bucket": "recipe-app-782da.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:277706474592:android:935886c83ff8d8aa13ef05",
+        "android_client_info": {
+          "package_name": "com.example.recipe_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHxlLVyaWJuKswAWzKWpflX9dPxvbf5bI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

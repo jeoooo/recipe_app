@@ -11,13 +11,10 @@ import '../../widgets/add_recipe_fab.dart';
 
 class AdminDashboard extends StatefulWidget {
   final name;
-  final token;
-  final id;
+
   const AdminDashboard({
     Key? key,
     required this.name,
-    required this.token,
-    required this.id,
   }) : super(key: key);
 
   @override
@@ -142,9 +139,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     child: Column(
                       children: [
                         RecipeCard(
-                            auth_id: widget.id,
                             name: widget.name,
-                            token: widget.token,
                             id: recipeList[index]['id'],
                             recipeName: recipeList[index]['recipe_name'],
                             image: recipeList[index]['image']),
@@ -157,11 +152,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         ),
       ),
-      floatingActionButton: AddRecipeFAB(
-          currentScreen: 'admin',
-          id: widget.id,
-          name: widget.name,
-          token: widget.token),
+      floatingActionButton:
+          AddRecipeFAB(currentScreen: 'admin', name: widget.name),
     );
   }
 }

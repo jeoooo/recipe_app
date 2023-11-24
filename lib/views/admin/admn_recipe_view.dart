@@ -10,15 +10,9 @@ import 'package:recipe_app/widgets/cooky_app_bar.dart';
 
 class AdminRecipeView extends StatelessWidget {
   final name;
-  final token;
-  final auth_id;
+
   final id;
-  const AdminRecipeView(
-      {super.key,
-      required this.id,
-      required this.auth_id,
-      required this.name,
-      required this.token});
+  const AdminRecipeView({super.key, required this.id, required this.name});
 
   @override
   Widget build(BuildContext context) {
@@ -188,9 +182,7 @@ class AdminRecipeView extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                               builder: (context) => AdminDashboard(
-                                    id: auth_id,
                                     name: name,
-                                    token: token,
                                   )));
                     } else {
                       // User canceled the delete operation, do nothing or perform additional actions

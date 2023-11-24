@@ -14,13 +14,11 @@ import 'package:recipe_app/widgets/customForm_widget.dart';
 import 'package:http/http.dart' as http;
 
 class AdminUpdateRecipe extends StatefulWidget {
-  final id;
   final name;
   final token;
   // ignore: use_key_in_widget_constructors
   const AdminUpdateRecipe({
     Key? key,
-    required this.id,
     required this.name,
     required this.token,
   });
@@ -126,29 +124,12 @@ class _AdminUpdateRecipeState extends State<AdminUpdateRecipe> {
               ),
               Button(
                 onPressed: () async {
-                  final body = <String, dynamic>{
-                    "recipe_name": recipeNameController.text,
-                    "recipe_servings": servingsController.text,
-                    "recipe_preparation_time": preparationTimeController.text,
-                    "ingredients": ingredientController.text,
-                    "procedure": procedureController.text
-                  };
-
-                  final multipartFile = http.MultipartFile.fromBytes(
-                      'image', await File(selectedFile!.path).readAsBytes(),
-                      filename: selectedFile!.path);
-                  await pb
-                      .collection('recipe')
-                      .update(widget.id, body: body, files: [multipartFile]);
-
-                  // ignore: use_build_context_synchronously
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) => AdminDashboard(
-                          name: widget.name,
-                          token: widget.token,
-                          id: widget.id),
+                        name: widget.name,
+                      ),
                     ),
                   );
                 },

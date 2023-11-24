@@ -1,18 +1,16 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/auth/auth.dart';
-
 import 'package:recipe_app/views/admin/admin_login.dart';
 import 'package:recipe_app/views/client/dashboard.dart';
 import 'package:recipe_app/views/client/sign_up.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
+import 'package:recipe_app/auth/auth.dart';
 
 class Login extends StatelessWidget {
-  // ignore: use_key_in_widget_constructors
   const Login({
     Key? key,
   });
@@ -21,6 +19,7 @@ class Login extends StatelessWidget {
   Widget build(BuildContext context) {
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
+    final FirebaseAuthService authService = FirebaseAuthService();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -60,21 +59,45 @@ class Login extends StatelessWidget {
                 child: Button(
                   buttonText: 'Log In',
                   onPressed: () async {
-                    final authResult = await authenticateUser(
-                        'http://10.0.2.2:8090',
+                    try {
+                      await authService.signInWithEmailAndPassword(
                         emailController.text,
-                        passwordController.text);
-                    // ignore: use_build_context_synchronously
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Dashboard(
-                          name: authResult?.name,
-                          token: authResult?.token,
-                          id: authResult?.id,
+                        passwordController.text,
+                      );
+
+                      String userId =
+                          authService.user?.uid ?? ''; // Get the user ID
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Dashboard(
+                            userId: userId,
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    } catch (e) {
+                      // Display an AlertDialog for any exceptions
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('Error'),
+                            content: Text(
+                                'Failed to log in. Check your credentials.'),
+                            actions: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(
+                                      context); // Close the AlertDialog
+                                },
+                                child: Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
                   },
                 ),
               ),
@@ -98,7 +121,8 @@ class Login extends StatelessWidget {
                         foregroundColor:
                             MaterialStateProperty.all(Color(0xffCB4036)),
                         padding: MaterialStateProperty.all(
-                            EdgeInsets.only(left: 0, right: 0)),
+                          EdgeInsets.only(left: 0, right: 0),
+                        ),
                       ),
                       child: Text(
                         'SIGN UP NOW!',

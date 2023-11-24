@@ -14,12 +14,10 @@ import 'package:recipe_app/widgets/customForm_widget.dart';
 import 'package:http/http.dart' as http;
 
 class AdminCreateRecipe extends StatefulWidget {
-  final id;
   final name;
-  final token;
+
   // ignore: use_key_in_widget_constructors
-  const AdminCreateRecipe(
-      {Key? key, required this.id, required this.name, required this.token});
+  const AdminCreateRecipe({Key? key, required this.name});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -142,9 +140,8 @@ class _AdminCreateRecipeState extends State<AdminCreateRecipe> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => AdminDashboard(
-                          name: widget.name,
-                          token: widget.token,
-                          id: widget.id),
+                        name: widget.name,
+                      ),
                     ),
                   );
                 },

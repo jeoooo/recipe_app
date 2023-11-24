@@ -1,73 +1,97 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:crypto/crypto.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 
-class AuthResult {
-  final String id;
-  final String name;
-  final String role;
-  final String email;
-  final String token;
+class FirebaseAuthService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final DatabaseReference _database =
+      FirebaseDatabase.instance.ref().child('users');
 
-  AuthResult(
-      {required this.id,
-      required this.name,
-      required this.role,
-      required this.email,
-      required this.token});
+  User? _user;
 
-  factory AuthResult.fromJson(Map<String, dynamic> json) {
-    final record = json['record'];
-    return AuthResult(
-      id: record['id'],
-      name: record['name'],
-      role: record['role'],
-      email: record['email'],
-      token: json['token'],
-    );
+  User? get user => _user;
+
+  Future<void> initialize() async {
+    await Firebase.initializeApp();
+    await _checkCurrentUser();
   }
-}
 
-Future<AuthResult?> authenticateUser(
-    String baseUrl, String email, String password) async {
-  try {
-    final url = Uri.parse('$baseUrl/api/collections/users/auth-with-password');
-    final headers = {'Content-Type': 'application/json'};
-    final body = jsonEncode({'identity': email, 'password': password});
-
-    final response = await http.post(url, headers: headers, body: body);
-
-    if (response.statusCode == 200) {
-      final authData = jsonDecode(response.body);
-      return AuthResult.fromJson(authData);
-    } else {
-      print('Authentication failed. Status code: ${response.statusCode}');
-      return null;
+  Future<void> _checkCurrentUser() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      _user = user;
     }
-  } catch (e) {
-    print('Error: $e');
-    return null;
   }
-}
 
-// Example usage:
-void main() async {
-  final baseUrl = 'http://10.0.2.2:8090'; // For emulator
-  // final baseUrl = 'http://127.0.0.1:8090'; // For testing on a real device
+  Future<void> signOut() async {
+    try {
+      await _auth.signOut();
+      _user = null;
+    } catch (e) {
+      print('Error during sign out: $e');
+    }
+  }
 
-  final email = 'client@example.com';
-  final password = 'client123';
+  Future<void> createUserWithEmailAndPassword(
+      String name, String email, String password, String role) async {
+    try {
+      UserCredential authResult = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-  final authResult = await authenticateUser(baseUrl, email, password);
+      // Store additional user data in Realtime Database
+      await _database.child(authResult.user!.uid).set({
+        'name': name,
+        'email': email,
+        'password': _hashPassword(password),
+        'role': role,
+      });
 
-  if (authResult != null) {
-    print('Authentication successful:');
-    print('ID: ${authResult.id}');
-    print('Name: ${authResult.name}');
-    print('Role: ${authResult.role}');
-    print('Email: ${authResult.email}');
-    print('Token: ${authResult.token}');
-    // Add more information as needed
-  } else {
-    print('Authentication failed');
+      // Fetch and update user's name
+      await _fetchUserName(authResult.user!.uid);
+
+      await _checkCurrentUser();
+    } catch (e) {
+      print('Error during sign up: $e');
+    }
+  }
+
+  Future<void> signInWithEmailAndPassword(String email, String password) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Fetch and update user's name
+      await _fetchUserName(_auth.currentUser!.uid);
+
+      await _checkCurrentUser();
+    } catch (e) {
+      print('Error during sign in: $e');
+    }
+  }
+
+  Future<void> _fetchUserName(String userId) async {
+    try {
+      // Fetch the user's name from the Realtime Database
+      var snapshot = await _database.child(userId).child('name').once();
+
+      var name = snapshot;
+
+      // Update the user's display name
+      _user?.updateDisplayName(name.toString());
+    } catch (e) {
+      print("Error fetching user name: $e");
+    }
+  }
+
+  String _hashPassword(String password) {
+    var bytes = utf8.encode(password);
+    var digest = sha256.convert(bytes);
+    return digest.toString();
   }
 }

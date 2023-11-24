@@ -145,9 +145,8 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => Dashboard(
-                          name: widget.name,
-                          token: widget.token,
-                          id: widget.id),
+                        userId: 'username',
+                      ),
                     ),
                   );
                 },

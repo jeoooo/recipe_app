@@ -189,9 +189,7 @@ class RecipeView extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                               builder: (context) => Dashboard(
-                                    id: auth_id,
-                                    name: name,
-                                    token: token,
+                                    userId: 'username',
                                   )));
                     } else {
                       // User canceled the delete operation, do nothing or perform additional actions

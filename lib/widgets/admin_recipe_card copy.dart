@@ -30,9 +30,7 @@ class AdminRecipeCard extends StatelessWidget {
             MaterialPageRoute(
                 builder: (context) => AdminRecipeView(
                       id: id,
-                      auth_id: auth_id,
                       name: name,
-                      token: token,
                     )));
       },
       child: Card(

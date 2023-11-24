@@ -1,83 +1,49 @@
-import 'dart:io';
-
-import 'package:flutter/material.dart';
-import 'package:pocketbase/pocketbase.dart';
-import 'package:recipe_app/utils/pocketbase_conn.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:recipe_app/models/recipe_model.dart';
-import 'package:http/http.dart' as http;
 
 class RecipeController {
-  PocketBase pb = PocketBaseUtils.pocketBaseInstance;
+  final DatabaseReference _databaseReference =
+      FirebaseDatabase.instance.ref().child('recipes');
 
-  RecipeController({required this.pb});
-
-  Future<void> createRecipe(
-      {required Recipe recipe, required String file}) async {
+  Future<void> addRecipe(Recipe recipe) async {
     try {
-      final body = recipe.toJson();
-      // final multipartFile =
-      //     http.MultipartFile.fromString('image', file, filename: file);
-      final multipartFile = http.MultipartFile.fromBytes(
-        'image',
-        await File(file).readAsBytes(),
-        filename: file,
-      );
+      // Generate a unique ID for the new recipe
+      String recipeId = _databaseReference.push().key ?? '';
 
-      await pb.collection('recipe').create(body: body, files: [multipartFile]);
-      // Handle the created record or perform additional actions if needed
+      // Set the recipe data in the database
+      await _databaseReference.child(recipeId).set(recipe.toJson());
     } catch (e) {
-      // Handle errors appropriately, e.g., show an error message to the user
-      debugPrint('Error creating recipe: $e');
+      print('Error adding recipe: $e');
     }
   }
 
-  Future<void> updateRecipe({
-    required String recordId,
-    required Recipe recipe,
-  }) async {
+  Future<Stream<DatabaseEvent>?> getRecipe(String recipeId) async {
     try {
-      final body = recipe.toJson();
-      await pb.collection('recipe').update(recordId, body: body);
-      // Handle the updated record or perform additional actions if needed
+      // Fetch the recipe data from the database based on recipe ID
+      DatabaseReference ref = FirebaseDatabase.instance.ref("recipes");
+      Stream<DatabaseEvent> stream = ref.onValue;
+      return stream;
     } catch (e) {
-      // Handle errors appropriately, e.g., show an error message to the user
-      debugPrint('Error updating recipe: $e');
+      print('Error fetching recipe: $e');
+      return null;
     }
   }
 
-  Future<void> deleteRecipe(String recordId) async {
+  Future<void> updateRecipe(String recipeId, Recipe updatedRecipe) async {
     try {
-      await pb.collection('recipe').delete(recordId);
-      // Perform additional actions after successful deletion if needed
+      // Update the recipe data in the database
+      await _databaseReference.child(recipeId).update(updatedRecipe.toJson());
     } catch (e) {
-      // Handle errors appropriately, e.g., show an error message to the user
-      debugPrint('Error deleting recipe: $e');
+      print('Error updating recipe: $e');
     }
   }
 
-  Future<dynamic> getAllRecipes() async {
+  Future<void> deleteRecipe(String recipeId) async {
     try {
-      final records = await pb.collection('recipe').getFullList();
-
-      return records;
+      // Delete the recipe from the database
+      await _databaseReference.child(recipeId).remove();
     } catch (e) {
-      // Handle errors appropriately, e.g., show an error message to the user
-      debugPrint('Error fetching all recipes: $e');
-      return [];
-    }
-  }
-
-  Future<dynamic> getAllOwnedRecipes(String id) async {
-    try {
-      final records = await pb
-          .collection('recipe')
-          .getFullList(fields: 'recipe_name, image', filter: 'user_id="$id"');
-
-      return records;
-    } catch (e) {
-      // Handle errors appropriately, e.g., show an error message to the user
-      debugPrint('Error fetching all recipes: $e');
-      return [];
+      print('Error deleting recipe: $e');
     }
   }
 }
