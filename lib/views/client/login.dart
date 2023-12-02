@@ -19,7 +19,6 @@ class Login extends StatelessWidget {
   Widget build(BuildContext context) {
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
-    final FirebaseAuthService authService = FirebaseAuthService();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -60,36 +59,56 @@ class Login extends StatelessWidget {
                   buttonText: 'Log In',
                   onPressed: () async {
                     try {
-                      await authService.signInWithEmailAndPassword(
+                      await Auth.login(
                         emailController.text,
                         passwordController.text,
                       );
 
-                      String userId =
-                          authService.user?.uid ?? ''; // Get the user ID
+                      if (Auth.isAuthenticated()) {
+                        String userId = Auth.getUserId();
 
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Dashboard(
-                            userId: userId,
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Dashboard(
+                              userId: userId,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      } else {
+                        // Handle authentication failure
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text('Authentication Error'),
+                              content: Text(
+                                  'Invalid email or password. Please try again.'),
+                              actions: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                     } catch (e) {
-                      // Display an AlertDialog for any exceptions
+                      // Handle other errors
                       showDialog(
                         context: context,
                         builder: (context) {
                           return AlertDialog(
                             title: Text('Error'),
                             content: Text(
-                                'Failed to log in. Check your credentials.'),
+                                'An unexpected error occurred. Please try again.'),
                             actions: [
                               ElevatedButton(
                                 onPressed: () {
-                                  Navigator.pop(
-                                      context); // Close the AlertDialog
+                                  Navigator.pop(context);
                                 },
                                 child: Text('OK'),
                               ),

@@ -1,4 +1,5 @@
-// ignore_for_file: prefer_const_constructors, sized_box_for_whitespace, non_constant_identifier_names
+// Import necessary packages
+// ignore_for_file: sized_box_for_whitespace, use_build_context_synchronously, prefer_const_constructors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -10,13 +11,11 @@ import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
 
 class SignUp extends StatelessWidget {
-  const SignUp({
-    Key? key,
-  }) : super(key: key);
+  const SignUp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final FirebaseAuthService authService = FirebaseAuthService();
+    final Auth authService = Auth(); // Replace with your SQLite service
     TextEditingController nameController = TextEditingController();
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
@@ -136,14 +135,16 @@ class SignUp extends StatelessWidget {
                     buttonText: 'Sign up',
                     onPressed: () async {
                       try {
-                        await authService.createUserWithEmailAndPassword(
+                        await Auth.signup(
                           nameController.text,
                           emailController.text,
                           passwordController.text,
                           'client', // Assuming a default role of 'client'
                         );
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context) => Login()));
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => Login()),
+                        );
                       } catch (e) {
                         // Display an AlertDialog for any exceptions
                         showDialog(
@@ -155,8 +156,7 @@ class SignUp extends StatelessWidget {
                               actions: [
                                 ElevatedButton(
                                   onPressed: () {
-                                    Navigator.pop(
-                                        context); // Close the AlertDialog
+                                    Navigator.pop(context);
                                   },
                                   child: Text('OK'),
                                 ),
@@ -182,8 +182,10 @@ class SignUp extends StatelessWidget {
                           style: GoogleFonts.lexend()),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushReplacement(context,
-                              MaterialPageRoute(builder: (context) => Login()));
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => Login()),
+                          );
                         },
                         style: ButtonStyle(
                           foregroundColor:

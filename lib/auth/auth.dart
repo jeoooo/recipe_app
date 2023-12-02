@@ -1,97 +1,71 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
-import 'package:crypto/crypto.dart';
-import 'dart:convert';
+// auth.dart
 
-class FirebaseAuthService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final DatabaseReference _database =
-      FirebaseDatabase.instance.ref().child('users');
+class User {
+  String? userId;
+  String name;
+  String email;
+  String password;
+  String role;
 
-  User? _user;
+  User({
+    required this.name,
+    required this.email,
+    required this.password,
+    required this.role,
+  });
+}
 
-  User? get user => _user;
+class Auth {
+  static List<User> users = []; // Simulated user database
 
-  Future<void> initialize() async {
-    await Firebase.initializeApp();
-    await _checkCurrentUser();
-  }
+  static User? currentUser;
 
-  Future<void> _checkCurrentUser() async {
-    User? user = _auth.currentUser;
-    if (user != null) {
-      _user = user;
+  static Future<bool> login(String email, String password) async {
+    // Perform authentication logic, e.g., check credentials against a database
+    // If authentication is successful, set the currentUser
+    // Otherwise, return false
+
+    // For simplicity, we'll just check against hardcoded values
+    for (var user in users) {
+      if (user.email == email && user.password == password) {
+        currentUser = user;
+        return true;
+      }
     }
+    return false;
   }
 
-  Future<void> signOut() async {
-    try {
-      await _auth.signOut();
-      _user = null;
-    } catch (e) {
-      print('Error during sign out: $e');
-    }
-  }
-
-  Future<void> createUserWithEmailAndPassword(
+  static Future<bool> signup(
       String name, String email, String password, String role) async {
-    try {
-      UserCredential authResult = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+    // Perform signup logic, e.g., add user to the database
+    // If signup is successful, set the currentUser
+    // Otherwise, return false
 
-      // Store additional user data in Realtime Database
-      await _database.child(authResult.user!.uid).set({
-        'name': name,
-        'email': email,
-        'password': _hashPassword(password),
-        'role': role,
-      });
-
-      // Fetch and update user's name
-      await _fetchUserName(authResult.user!.uid);
-
-      await _checkCurrentUser();
-    } catch (e) {
-      print('Error during sign up: $e');
-    }
+    // For simplicity, we'll add the user to the simulated user database
+    // In a real-world scenario, you would perform database operations
+    var newUser = User(
+      name: name,
+      email: email,
+      password: password,
+      role: role,
+    );
+    users.add(newUser);
+    currentUser = newUser;
+    return true;
   }
 
-  Future<void> signInWithEmailAndPassword(String email, String password) async {
-    try {
-      await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      // Fetch and update user's name
-      await _fetchUserName(_auth.currentUser!.uid);
-
-      await _checkCurrentUser();
-    } catch (e) {
-      print('Error during sign in: $e');
-    }
+  static void logout() {
+    // Clear the currentUser when the user logs out
+    currentUser = null;
   }
 
-  Future<void> _fetchUserName(String userId) async {
-    try {
-      // Fetch the user's name from the Realtime Database
-      var snapshot = await _database.child(userId).child('name').once();
-
-      var name = snapshot;
-
-      // Update the user's display name
-      _user?.updateDisplayName(name.toString());
-    } catch (e) {
-      print("Error fetching user name: $e");
-    }
+  static bool isAuthenticated() {
+    // Check if a user is authenticated (currentUser is not null)
+    return currentUser != null;
   }
 
-  String _hashPassword(String password) {
-    var bytes = utf8.encode(password);
-    var digest = sha256.convert(bytes);
-    return digest.toString();
+  static String getUserId() {
+    // Get the user ID of the authenticated user
+    return currentUser?.userId ?? "";
   }
 }
