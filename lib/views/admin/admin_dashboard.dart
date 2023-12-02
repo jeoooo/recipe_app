@@ -1,31 +1,28 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_typing_uninitialized_variables
+// Dashboard.dart
+
+// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/utils/pocketbase_conn_test_utils.dart';
-
+import 'package:recipe_app/models/recipe_model.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/recipe_card.dart';
-
-import '../../widgets/add_recipe_fab.dart';
+import 'package:recipe_app/widgets/add_recipe_fab.dart';
+import 'package:recipe_app/controllers/recipe_controller.dart';
 
 class AdminDashboard extends StatefulWidget {
-  final name;
+  final String userId;
 
-  const AdminDashboard({
-    Key? key,
-    required this.name,
-  }) : super(key: key);
+  const AdminDashboard({Key? key, required this.userId}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _AdminDashboardState createState() => _AdminDashboardState();
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
   bool ownRecipesSelected = true;
-
-  List<dynamic> recipeList = []; // Store the list of recipes
+  List<Recipe> recipeList = [];
+  String? errorMessage;
 
   @override
   void initState() {
@@ -35,26 +32,40 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<void> _fetchRecipes() async {
     try {
-      // Fetch all records from the 'recipe' collection and sort by the 'created' field in descending order
-      final records = await PocketBaseTestUtils.pocketBaseTestInstance
-          .collection('recipe')
-          .getFullList(sort: '-created');
-
+      List<Recipe> recipes = await RecipeController().getAllRecipes();
       setState(() {
-        recipeList = records;
+        recipeList = recipes;
+        errorMessage = null;
       });
     } catch (e) {
-      // Handle any errors that might occur during the fetch
-      debugPrint("Error fetching recipes: $e");
+      setState(() {
+        errorMessage = 'Error fetching recipes: $e';
+      });
+    }
+  }
+
+  List<Recipe> getDisplayedRecipes() {
+    if (ownRecipesSelected) {
+      return recipeList
+          .where((recipe) => recipe.createdBy == widget.userId)
+          .toList();
+    } else {
+      return recipeList
+          .where((recipe) => recipe.createdBy != widget.userId)
+          .toList();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    List<Recipe> displayedRecipes = getDisplayedRecipes();
+
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar:
-          const CookyAppBar(color: Color(0xffCB4036), currentScreen: 'admin'),
+      appBar: const CookyAppBar(
+        color: Color(0xffCB4036),
+        currentScreen: 'client',
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -62,7 +73,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hi, ${widget.name}',
+                'Hi, ${widget.userId}',
                 style: GoogleFonts.paytoneOne(fontSize: 20),
               ),
               Text(
@@ -100,7 +111,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         ),
                       ),
                     ),
-                    // Add some space between buttons
                     FilledButton(
                       style: ButtonStyle(
                         elevation: MaterialStateProperty.all(0),
@@ -130,21 +140,46 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ],
                 ),
               ),
+              if (errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    errorMessage!,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              if (displayedRecipes.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    ownRecipesSelected
+                        ? 'You have not added any recipes yet.'
+                        : 'No recipes from others available.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: recipeList.length,
+                itemCount: displayedRecipes.length,
                 itemBuilder: (context, index) {
-                  return Center(
-                    child: Column(
-                      children: [
-                        RecipeCard(
-                            name: widget.name,
-                            id: recipeList[index]['id'],
-                            recipeName: recipeList[index]['recipe_name'],
-                            image: recipeList[index]['image']),
-                      ],
-                    ),
+                  var recipe = displayedRecipes[index];
+
+                  return Column(
+                    children: [
+                      RecipeCard(
+                        id: recipe.id!,
+                        recipeName: recipe.name,
+                        image: recipe.imageFileName ?? '',
+                        name: widget.userId,
+                      ),
+                    ],
                   );
                 },
               ),
@@ -152,8 +187,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         ),
       ),
-      floatingActionButton:
-          AddRecipeFAB(currentScreen: 'admin', name: widget.name),
+      floatingActionButton: AddRecipeFAB(currentScreen: 'admindashboard'),
     );
   }
 }

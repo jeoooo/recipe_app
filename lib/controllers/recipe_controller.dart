@@ -1,49 +1,70 @@
-import 'package:firebase_database/firebase_database.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:recipe_app/db/db_conn.dart';
 import 'package:recipe_app/models/recipe_model.dart';
 
 class RecipeController {
-  final DatabaseReference _databaseReference =
-      FirebaseDatabase.instance.ref().child('recipes');
+  late Database _database;
+  late bool _isDatabaseInitialized;
 
-  Future<void> addRecipe(Recipe recipe) async {
-    try {
-      // Generate a unique ID for the new recipe
-      String recipeId = _databaseReference.push().key ?? '';
+  RecipeController() {
+    _isDatabaseInitialized = false;
+    _initDatabase();
+  }
 
-      // Set the recipe data in the database
-      await _databaseReference.child(recipeId).set(recipe.toJson());
-    } catch (e) {
-      print('Error adding recipe: $e');
+  Future<void> _initDatabase() async {
+    final DatabaseHelper dbHelper = DatabaseHelper();
+    _database = await dbHelper.database;
+    _isDatabaseInitialized = true;
+  }
+
+  Future<void> _ensureDatabaseInitialized() async {
+    if (!_isDatabaseInitialized) {
+      await _initDatabase();
     }
   }
 
-  Future<Stream<DatabaseEvent>?> getRecipe(String recipeId) async {
-    try {
-      // Fetch the recipe data from the database based on recipe ID
-      DatabaseReference ref = FirebaseDatabase.instance.ref("recipes");
-      Stream<DatabaseEvent> stream = ref.onValue;
-      return stream;
-    } catch (e) {
-      print('Error fetching recipe: $e');
-      return null;
-    }
+  Future<void> insertRecipe(Recipe recipe) async {
+    await _ensureDatabaseInitialized();
+    await _database.insert("recipes", recipe.toMap());
   }
 
-  Future<void> updateRecipe(String recipeId, Recipe updatedRecipe) async {
-    try {
-      // Update the recipe data in the database
-      await _databaseReference.child(recipeId).update(updatedRecipe.toJson());
-    } catch (e) {
-      print('Error updating recipe: $e');
-    }
+  Future<List<Recipe>> getAllRecipes() async {
+    await _ensureDatabaseInitialized();
+    final List<Map<String, dynamic>> maps = await _database.query('recipes');
+    return List.generate(maps.length, (i) {
+      return Recipe.fromMap(maps[i]);
+    });
   }
 
-  Future<void> deleteRecipe(String recipeId) async {
-    try {
-      // Delete the recipe from the database
-      await _databaseReference.child(recipeId).remove();
-    } catch (e) {
-      print('Error deleting recipe: $e');
+  Future<Recipe?> getRecipeById(int id) async {
+    await _ensureDatabaseInitialized();
+    final List<Map<String, dynamic>> maps = await _database.query(
+      'recipes',
+      where: 'recipe_id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      return Recipe.fromMap(maps.first);
     }
+
+    return null;
+  }
+
+  Future<void> updateRecipe(Recipe recipe) async {
+    await _ensureDatabaseInitialized();
+    await _database.update('recipes', recipe.toMap(),
+        where: 'recipe_id = ?', whereArgs: [recipe.id]);
+  }
+
+  Future<void> deleteRecipe(int id) async {
+    await _ensureDatabaseInitialized();
+    await _database.delete('recipes', where: 'recipe_id = ?', whereArgs: [id]);
+  }
+
+  Future<List<Map<String, dynamic>>> getImageAndRecipeNames() async {
+    await _ensureDatabaseInitialized();
+    return await _database
+        .rawQuery('SELECT imageFileName, recipe_name FROM recipes');
   }
 }

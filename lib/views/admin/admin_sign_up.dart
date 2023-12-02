@@ -1,23 +1,21 @@
-// ignore_for_file: prefer_const_constructors, sized_box_for_whitespace, non_constant_identifier_names
+// Import necessary packages
+// ignore_for_file: sized_box_for_whitespace, use_build_context_synchronously, prefer_const_constructors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recipe_app/auth/auth.dart';
-import 'package:recipe_app/views/admin/admin_login.dart';
 
 import 'package:recipe_app/views/client/login.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
 
 class AdminSignUp extends StatelessWidget {
-  const AdminSignUp({
-    Key? key,
-  }) : super(key: key);
+  const AdminSignUp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final FirebaseAuthService authService = FirebaseAuthService();
+    // final Auth authService = Auth(); // Replace with your SQLite service
     TextEditingController nameController = TextEditingController();
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
@@ -137,20 +135,18 @@ class AdminSignUp extends StatelessWidget {
                     buttonText: 'Sign up',
                     onPressed: () async {
                       try {
-                        await authService.createUserWithEmailAndPassword(
+                        await Auth.signup(
                           nameController.text,
                           emailController.text,
                           passwordController.text,
                           'admin', // Assuming a default role of 'client'
                         );
-                        // ignore: use_build_context_synchronously
                         Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => AdminLogin()));
+                          context,
+                          MaterialPageRoute(builder: (context) => Login()),
+                        );
                       } catch (e) {
                         // Display an AlertDialog for any exceptions
-                        // ignore: use_build_context_synchronously
                         showDialog(
                           context: context,
                           builder: (context) {
@@ -160,8 +156,7 @@ class AdminSignUp extends StatelessWidget {
                               actions: [
                                 ElevatedButton(
                                   onPressed: () {
-                                    Navigator.pop(
-                                        context); // Close the AlertDialog
+                                    Navigator.pop(context);
                                   },
                                   child: Text('OK'),
                                 ),
@@ -188,9 +183,9 @@ class AdminSignUp extends StatelessWidget {
                       TextButton(
                         onPressed: () {
                           Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => AdminLogin()));
+                            context,
+                            MaterialPageRoute(builder: (context) => Login()),
+                          );
                         },
                         style: ButtonStyle(
                           foregroundColor:

@@ -1,41 +1,50 @@
 class Recipe {
-  String? id;
-  String? imageUrl; // Store the URL or path to the image
-  String? name;
-  List<String>? ingredients;
-  String? procedure;
-  String? createdBy;
+  int? id;
+  String name;
+  String ingredients;
+  String procedure;
+  String? imageFileName;
+  String createdBy;
+  String servings;
+  String cookTime;
+  String preparationTime;
 
   Recipe({
     this.id,
-    this.imageUrl,
-    this.name,
-    this.ingredients,
-    this.procedure,
-    this.createdBy,
+    required this.name,
+    required this.ingredients,
+    required this.procedure,
+    required this.imageFileName,
+    required this.createdBy,
+    required this.servings,
+    required this.cookTime,
+    required this.preparationTime,
   });
 
-  factory Recipe.fromJson(Map<String, dynamic> json) {
+  factory Recipe.fromMap(Map<String, dynamic> map) {
     return Recipe(
-      id: json['id'],
-      imageUrl: json['imageUrl'],
-      name: json['name'],
-      ingredients: (json['ingredients'] as List<dynamic>?)
-          ?.map((ingredient) => ingredient.toString())
-          .toList(),
-      procedure: json['procedure'],
-      createdBy: json['createdBy'],
+      id: map['recipe_id'],
+      name: map['recipe_name'],
+      ingredients: map['ingredients'],
+      procedure: map['procedure'],
+      imageFileName: map['imageFileName'],
+      createdBy: map['created_by'],
+      servings: map['servings'],
+      cookTime: map['cookTime'],
+      preparationTime: map['preparationTime'],
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'imageUrl': imageUrl,
-      'name': name,
+      'recipe_name': name,
       'ingredients': ingredients,
       'procedure': procedure,
-      'createdBy': createdBy,
+      'imageFileName': imageFileName,
+      'created_by': createdBy,
+      'servings': servings,
+      'cookTime': cookTime,
+      'preparationTime': preparationTime,
     };
   }
 }

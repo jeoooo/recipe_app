@@ -1,4 +1,5 @@
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, use_key_in_widget_constructors
+// Import necessary packages and files
+// ignore_for_file: use_build_context_synchronously, prefer_const_constructors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -11,16 +12,13 @@ import 'package:recipe_app/widgets/customForm_widget.dart';
 import 'package:recipe_app/auth/auth.dart';
 
 class Login extends StatelessWidget {
-  const Login({
-    Key? key,
-  });
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Login({super.key});
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController emailController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
-    final FirebaseAuthService authService = FirebaseAuthService();
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -60,36 +58,56 @@ class Login extends StatelessWidget {
                   buttonText: 'Log In',
                   onPressed: () async {
                     try {
-                      await authService.signInWithEmailAndPassword(
+                      await Auth.login(
                         emailController.text,
                         passwordController.text,
                       );
 
-                      String userId =
-                          authService.user?.uid ?? ''; // Get the user ID
+                      if (Auth.isAuthenticated()) {
+                        String userId = Auth.getUserName();
 
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Dashboard(
-                            userId: userId,
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Dashboard(
+                              userId: userId,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      } else {
+                        // Handle authentication failure
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text('Authentication Error'),
+                              content: Text(
+                                  'Invalid email or password. Please try again.'),
+                              actions: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                     } catch (e) {
-                      // Display an AlertDialog for any exceptions
+                      // Handle other errors
                       showDialog(
                         context: context,
                         builder: (context) {
                           return AlertDialog(
                             title: Text('Error'),
                             content: Text(
-                                'Failed to log in. Check your credentials.'),
+                                'An unexpected error occurred. Please try again.'),
                             actions: [
                               ElevatedButton(
                                 onPressed: () {
-                                  Navigator.pop(
-                                      context); // Close the AlertDialog
+                                  Navigator.pop(context);
                                 },
                                 child: Text('OK'),
                               ),
