@@ -1,34 +1,21 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_typing_uninitialized_variables
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/utils/pocketbase_conn_test_utils.dart';
-
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/recipe_card.dart';
-
 import '../../widgets/add_recipe_fab.dart';
 
 class Dashboard extends StatefulWidget {
-  final name;
-  final token;
-  final id;
-  const Dashboard({
-    Key? key,
-    required this.name,
-    required this.token,
-    required this.id,
-  }) : super(key: key);
+  final String userId;
+
+  Dashboard({Key? key, required this.userId}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _DashboardState createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
   bool ownRecipesSelected = true;
-
-  List<dynamic> recipeList = []; // Store the list of recipes
+  List<Map<String, dynamic>> recipeList = []; // Store the list of recipes
 
   @override
   void initState() {
@@ -38,13 +25,25 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> _fetchRecipes() async {
     try {
-      // Fetch all records from the 'recipe' collection and sort by the 'created' field in descending order
-      final records = await PocketBaseTestUtils.pocketBaseTestInstance
-          .collection('recipe')
-          .getFullList(sort: '-created');
-
+      // Fetch recipes from the database based on user and filter criteria
+      // Update the recipeList in the state
       setState(() {
-        recipeList = records;
+        // Replace the below example data with your actual recipe data
+        recipeList = [
+          {
+            'id': '1',
+            'name': 'Recipe 1',
+            'image': 'https://fakeimg.pl/325x150',
+            'created_by': widget.userId,
+          },
+          {
+            'id': '2',
+            'name': 'Recipe 2',
+            'image': 'https://fakeimg.pl/325x150',
+            'created_by': 'other_user',
+          },
+          // Add more recipes as needed
+        ];
       });
     } catch (e) {
       // Handle any errors that might occur during the fetch
@@ -52,8 +51,24 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
+  List<Map<String, dynamic>> getDisplayedRecipes() {
+    if (ownRecipesSelected) {
+      // Show only own recipes
+      return recipeList
+          .where((recipe) => recipe['created_by'] == widget.userId)
+          .toList();
+    } else {
+      // Show other's recipes
+      return recipeList
+          .where((recipe) => recipe['created_by'] != widget.userId)
+          .toList();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<Map<String, dynamic>> displayedRecipes = getDisplayedRecipes();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar:
@@ -65,7 +80,7 @@ class _DashboardState extends State<Dashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hi, ${widget.name}',
+                'Hi, Welcome to Cooky',
                 style: GoogleFonts.paytoneOne(fontSize: 20),
               ),
               Text(
@@ -136,18 +151,19 @@ class _DashboardState extends State<Dashboard> {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: recipeList.length,
+                itemCount: displayedRecipes.length,
                 itemBuilder: (context, index) {
+                  var recipe = displayedRecipes[index];
+
                   return Center(
                     child: Column(
                       children: [
                         RecipeCard(
-                            token: widget.token,
-                            name: widget.name,
-                            auth_id: widget.id,
-                            id: recipeList[index]['id'],
-                            recipeName: recipeList[index]['recipe_name'],
-                            image: recipeList[index]['image']),
+                          name: widget.userId,
+                          id: recipe['id'],
+                          recipeName: recipe['name'],
+                          image: recipe['image'],
+                        ),
                       ],
                     ),
                   );
@@ -157,11 +173,8 @@ class _DashboardState extends State<Dashboard> {
           ),
         ),
       ),
-      floatingActionButton: AddRecipeFAB(
-          currentScreen: 'client',
-          id: widget.id,
-          name: widget.name,
-          token: widget.token),
+      floatingActionButton:
+          AddRecipeFAB(currentScreen: 'client', name: widget.userId),
     );
   }
 }

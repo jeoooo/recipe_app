@@ -11,17 +11,13 @@ import '../../widgets/add_recipe_fab.dart';
 
 class AdminDashboard extends StatefulWidget {
   final name;
-  final token;
-  final id;
+
   const AdminDashboard({
     Key? key,
     required this.name,
-    required this.token,
-    required this.id,
   }) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _AdminDashboardState createState() => _AdminDashboardState();
 }
 
@@ -52,8 +48,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
+  List<dynamic> getDisplayedRecipes() {
+    if (ownRecipesSelected) {
+      // Show only own recipes
+      return recipeList
+          .where((recipe) => recipe['created_by'] == widget.name)
+          .toList();
+    } else {
+      // Show other's recipes
+      return recipeList
+          .where((recipe) => recipe['created_by'] != widget.name)
+          .toList();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<dynamic> displayedRecipes = getDisplayedRecipes();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar:
@@ -136,18 +148,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: recipeList.length,
+                itemCount: displayedRecipes.length,
                 itemBuilder: (context, index) {
                   return Center(
                     child: Column(
                       children: [
                         RecipeCard(
-                            auth_id: widget.id,
                             name: widget.name,
-                            token: widget.token,
-                            id: recipeList[index]['id'],
-                            recipeName: recipeList[index]['recipe_name'],
-                            image: recipeList[index]['image']),
+                            id: displayedRecipes[index]['id'],
+                            recipeName: displayedRecipes[index]['recipe_name'],
+                            image: displayedRecipes[index]['image']),
                       ],
                     ),
                   );
@@ -157,11 +167,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         ),
       ),
-      floatingActionButton: AddRecipeFAB(
-          currentScreen: 'admin',
-          id: widget.id,
-          name: widget.name,
-          token: widget.token),
+      floatingActionButton:
+          AddRecipeFAB(currentScreen: 'admin', name: widget.name),
     );
   }
 }

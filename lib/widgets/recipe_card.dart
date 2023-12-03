@@ -2,24 +2,21 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/views/admin/admn_recipe_view.dart';
+import 'package:recipe_app/views/admin/admin_recipe_view.dart';
 
 class RecipeCard extends StatelessWidget {
   final id;
   final name;
-  final token;
-  final auth_id;
+
   final String recipeName;
   final String image;
-  const RecipeCard(
-      {Key? key,
-      required this.id,
-      required this.recipeName,
-      required this.image,
-      required this.auth_id,
-      required this.name,
-      required this.token})
-      : super(key: key);
+  const RecipeCard({
+    Key? key,
+    required this.id,
+    required this.recipeName,
+    required this.image,
+    required this.name,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +27,7 @@ class RecipeCard extends StatelessWidget {
             MaterialPageRoute(
                 builder: (context) => AdminRecipeView(
                       id: id,
-                      auth_id: auth_id,
                       name: name,
-                      token: token,
                     )));
       },
       child: Card(

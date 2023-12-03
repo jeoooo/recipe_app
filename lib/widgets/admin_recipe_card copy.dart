@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/views/admin/admn_recipe_view.dart';
+import 'package:recipe_app/views/admin/admin_recipe_view.dart';
 
 class AdminRecipeCard extends StatelessWidget {
   final id;
@@ -30,9 +30,7 @@ class AdminRecipeCard extends StatelessWidget {
             MaterialPageRoute(
                 builder: (context) => AdminRecipeView(
                       id: id,
-                      auth_id: auth_id,
                       name: name,
-                      token: token,
                     )));
       },
       child: Card(

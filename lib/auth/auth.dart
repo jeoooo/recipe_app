@@ -1,73 +1,71 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+// auth.dart
 
-class AuthResult {
-  final String id;
-  final String name;
-  final String role;
-  final String email;
-  final String token;
+class User {
+  String? userId;
+  String name;
+  String email;
+  String password;
+  String role;
 
-  AuthResult(
-      {required this.id,
-      required this.name,
-      required this.role,
-      required this.email,
-      required this.token});
-
-  factory AuthResult.fromJson(Map<String, dynamic> json) {
-    final record = json['record'];
-    return AuthResult(
-      id: record['id'],
-      name: record['name'],
-      role: record['role'],
-      email: record['email'],
-      token: json['token'],
-    );
-  }
+  User({
+    required this.name,
+    required this.email,
+    required this.password,
+    required this.role,
+  });
 }
 
-Future<AuthResult?> authenticateUser(
-    String baseUrl, String email, String password) async {
-  try {
-    final url = Uri.parse('$baseUrl/api/collections/users/auth-with-password');
-    final headers = {'Content-Type': 'application/json'};
-    final body = jsonEncode({'identity': email, 'password': password});
+class Auth {
+  static List<User> users = []; // Simulated user database
 
-    final response = await http.post(url, headers: headers, body: body);
+  static User? currentUser;
 
-    if (response.statusCode == 200) {
-      final authData = jsonDecode(response.body);
-      return AuthResult.fromJson(authData);
-    } else {
-      print('Authentication failed. Status code: ${response.statusCode}');
-      return null;
+  static Future<bool> login(String email, String password) async {
+    // Perform authentication logic, e.g., check credentials against a database
+    // If authentication is successful, set the currentUser
+    // Otherwise, return false
+
+    // For simplicity, we'll just check against hardcoded values
+    for (var user in users) {
+      if (user.email == email && user.password == password) {
+        currentUser = user;
+        return true;
+      }
     }
-  } catch (e) {
-    print('Error: $e');
-    return null;
+    return false;
   }
-}
 
-// Example usage:
-void main() async {
-  final baseUrl = 'http://10.0.2.2:8090'; // For emulator
-  // final baseUrl = 'http://127.0.0.1:8090'; // For testing on a real device
+  static Future<bool> signup(
+      String name, String email, String password, String role) async {
+    // Perform signup logic, e.g., add user to the database
+    // If signup is successful, set the currentUser
+    // Otherwise, return false
 
-  final email = 'client@example.com';
-  final password = 'client123';
+    // For simplicity, we'll add the user to the simulated user database
+    // In a real-world scenario, you would perform database operations
+    var newUser = User(
+      name: name,
+      email: email,
+      password: password,
+      role: role,
+    );
+    users.add(newUser);
+    currentUser = newUser;
+    return true;
+  }
 
-  final authResult = await authenticateUser(baseUrl, email, password);
+  static void logout() {
+    // Clear the currentUser when the user logs out
+    currentUser = null;
+  }
 
-  if (authResult != null) {
-    print('Authentication successful:');
-    print('ID: ${authResult.id}');
-    print('Name: ${authResult.name}');
-    print('Role: ${authResult.role}');
-    print('Email: ${authResult.email}');
-    print('Token: ${authResult.token}');
-    // Add more information as needed
-  } else {
-    print('Authentication failed');
+  static bool isAuthenticated() {
+    // Check if a user is authenticated (currentUser is not null)
+    return currentUser != null;
+  }
+
+  static String getUserId() {
+    // Get the user ID of the authenticated user
+    return currentUser?.userId ?? "";
   }
 }

@@ -1,36 +1,32 @@
 // ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables
 import 'dart:io';
 import 'package:flutter/material.dart';
-
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
-
-import 'package:recipe_app/utils/pocketbase_conn.dart';
-import 'package:recipe_app/views/client/dashboard.dart';
+import 'package:recipe_app/controllers/recipe_controller.dart';
+import 'package:recipe_app/models/recipe_model.dart';
+import 'package:recipe_app/views/admin/admin_dashboard.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
-import 'package:http/http.dart' as http;
 
 class UpdateRecipe extends StatefulWidget {
-  final id;
-  final name;
-  final token;
-  // ignore: use_key_in_widget_constructors
+  final String name;
+  final int id; // Add id parameter
+
   const UpdateRecipe({
     Key? key,
-    required this.id,
     required this.name,
-    required this.token,
-  });
+    required this.id, // Include id in the constructor
+  }) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _UpdateRecipeState createState() => _UpdateRecipeState();
 }
 
 class _UpdateRecipeState extends State<UpdateRecipe> {
-  // Declare controllers as instance variables
+  final RecipeController _recipeController = RecipeController();
+
   TextEditingController recipeNameController = TextEditingController();
   TextEditingController servingsController = TextEditingController();
   TextEditingController preparationTimeController = TextEditingController();
@@ -49,10 +45,38 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
     }
   }
 
+  Future<void> _updateRecipe() async {
+    String recipeName = recipeNameController.text;
+    String servings = servingsController.text;
+    String preparationTime = preparationTimeController.text;
+    String ingredients = ingredientController.text;
+    String procedure = procedureController.text;
+
+    Recipe updatedRecipe = Recipe(
+      id: widget.id, // Use the provided id
+      name: recipeName,
+      ingredients: ingredients.split('\n'),
+      procedure: procedure,
+      image: selectedFile?.path ?? 'No file selected',
+      createdBy: widget.name,
+      servings: servings.toString(),
+      cookTime: preparationTime,
+    );
+
+    await _recipeController.updateRecipe(updatedRecipe);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AdminDashboard(
+          name: widget.name,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final pb = PocketBaseUtils.pocketBaseInstance;
-
     return Scaffold(
       appBar: CookyAppBar(color: Color(0xffCB4036)),
       body: SingleChildScrollView(
@@ -66,31 +90,25 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
                 controller: recipeNameController,
                 formType: FormType.Normal,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Number of Servings',
                 controller: servingsController,
                 formType: FormType.NumberInput,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Preparation Time',
                 controller: preparationTimeController,
                 formType: FormType.Normal,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Row(
                 children: [
                   ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor:
-                          MaterialStatePropertyAll(Color(0xffCB4036)),
+                          MaterialStateProperty.all(Color(0xffCB4036)),
                     ),
                     onPressed: _pickFile,
                     child: Text(
@@ -107,51 +125,21 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
                   ),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Ingredients',
                 controller: ingredientController,
                 formType: FormType.MultiLineText,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Procedure',
                 controller: procedureController,
                 formType: FormType.MultiLineText,
               ),
               Button(
-                onPressed: () async {
-                  final body = <String, dynamic>{
-                    "recipe_name": recipeNameController.text,
-                    "recipe_servings": servingsController.text,
-                    "recipe_preparation_time": preparationTimeController.text,
-                    "ingredients": ingredientController.text,
-                    "procedure": procedureController.text
-                  };
-
-                  final multipartFile = http.MultipartFile.fromBytes(
-                      'image', await File(selectedFile!.path).readAsBytes(),
-                      filename: selectedFile!.path);
-                  await pb
-                      .collection('recipe')
-                      .update(widget.id, body: body, files: [multipartFile]);
-
-                  // ignore: use_build_context_synchronously
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Dashboard(
-                          name: widget.name,
-                          token: widget.token,
-                          id: widget.id),
-                    ),
-                  );
-                },
-                buttonText: 'Publish Recipe',
+                onPressed: _updateRecipe,
+                buttonText: 'Update Recipe',
               ),
             ],
           ),

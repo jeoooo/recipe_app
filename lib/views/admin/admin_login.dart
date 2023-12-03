@@ -1,16 +1,16 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, use_key_in_widget_constructors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/auth/auth.dart';
-import 'package:recipe_app/views/admin/admin_dashboard.dart';
-import 'package:recipe_app/views/admin/admin_sign_up.dart';
+import 'package:recipe_app/views/client/dashboard.dart';
+import 'package:recipe_app/views/client/login.dart';
+import 'package:recipe_app/views/client/sign_up.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
+import 'package:recipe_app/auth/auth.dart';
 
 class AdminLogin extends StatelessWidget {
-  // ignore: use_key_in_widget_constructors
   const AdminLogin({
     Key? key,
   });
@@ -58,21 +58,65 @@ class AdminLogin extends StatelessWidget {
                 child: Button(
                   buttonText: 'Log In',
                   onPressed: () async {
-                    final authResult = await authenticateUser(
-                        'http://10.0.2.2:8090',
+                    try {
+                      await Auth.login(
                         emailController.text,
-                        passwordController.text);
-                    // ignore: use_build_context_synchronously
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AdminDashboard(
-                          name: authResult?.name,
-                          token: authResult?.token,
-                          id: authResult?.id,
-                        ),
-                      ),
-                    );
+                        passwordController.text,
+                      );
+
+                      if (Auth.isAuthenticated()) {
+                        String userId = Auth.getUserId();
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Dashboard(
+                              userId: userId,
+                            ),
+                          ),
+                        );
+                      } else {
+                        // Handle authentication failure
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: Text('Authentication Error'),
+                              content: Text(
+                                  'Invalid email or password. Please try again.'),
+                              actions: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    } catch (e) {
+                      // Handle other errors
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('Error'),
+                            content: Text(
+                                'An unexpected error occurred. Please try again.'),
+                            actions: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
                   },
                 ),
               ),
@@ -88,7 +132,7 @@ class AdminLogin extends StatelessWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => AdminSignUp(),
+                            builder: (context) => SignUp(),
                           ),
                         );
                       },
@@ -96,7 +140,8 @@ class AdminLogin extends StatelessWidget {
                         foregroundColor:
                             MaterialStateProperty.all(Color(0xffCB4036)),
                         padding: MaterialStateProperty.all(
-                            EdgeInsets.only(left: 0, right: 0)),
+                          EdgeInsets.only(left: 0, right: 0),
+                        ),
                       ),
                       child: Text(
                         'SIGN UP NOW!',
@@ -113,7 +158,7 @@ class AdminLogin extends StatelessWidget {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AdminLogin(),
+                      builder: (context) => Login(),
                     ),
                   );
                 },
@@ -124,7 +169,7 @@ class AdminLogin extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Login as admin',
+                  'Login as client',
                   style: GoogleFonts.paytoneOne(
                     fontWeight: FontWeight.w400,
                     decoration: TextDecoration.underline,

@@ -1,59 +1,94 @@
-// ignore_for_file: prefer_const_declarations, avoid_print
-import 'package:flutter_test/flutter_test.dart';
-import 'package:recipe_app/auth/auth.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:flutter/material.dart';
+// import 'package:recipe_app/auth/auth.dart';
+// import 'package:recipe_app/firebase_options.dart';
 
-void main() {
-  group('Authentication Tests', () {
-    test('Authenticate User', () async {
-      // final baseUrl = 'http://10.0.2.2:8090'; // For emulator
-      final baseUrl = 'http://127.0.0.1:8090'; // For testing on a real device
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await Firebase.initializeApp(
+//     options: DefaultFirebaseOptions.currentPlatform,
+//   );
 
-      final email = 'client@example.com';
-      final password = 'client123';
+//   final FirebaseAuthService authService = FirebaseAuthService();
+//   runApp(
+//     MaterialApp(
+//       home: MockAuthScreen(authService: authService),
+//     ),
+//   );
+// }
 
-      try {
-        final authResult = await authenticateUser(baseUrl, email, password);
+// class MockAuthScreen extends StatefulWidget {
+//   final FirebaseAuthService authService;
 
-        if (authResult != null) {
-          print('Authentication successful:');
-          print('ID: ${authResult.id}');
-          print('Name: ${authResult.name}');
-          print('Role: ${authResult.role}');
-          print('Email: ${authResult.email}');
-          print('Token: ${authResult.token}');
-          // Add more information as needed
-        } else {
-          print('Authentication failed');
-        }
-      } catch (e) {
-        print('Error during authentication: $e');
-      }
-    });
+//   MockAuthScreen({required this.authService});
 
-    test('Authenticate User with Invalid Credentials', () async {
-      // final baseUrl = 'http://10.0.2.2:8090'; // For emulator
-      final baseUrl = 'http://127.0.0.1:8090'; // For testing on a real device
+//   @override
+//   _MockAuthScreenState createState() => _MockAuthScreenState();
+// }
 
-      final email = 'client@example.com';
-      final password = 'invalidPassword';
+// class _MockAuthScreenState extends State<MockAuthScreen> {
+//   TextEditingController emailController = TextEditingController();
+//   TextEditingController passwordController = TextEditingController();
 
-      try {
-        final authResult = await authenticateUser(baseUrl, email, password);
+//   @override
+//   void initState() {
+//     super.initState();
+//   }
 
-        if (authResult != null) {
-          print('Authentication successful:');
-          print('ID: ${authResult.id}');
-          print('Name: ${authResult.name}');
-          print('Role: ${authResult.role}');
-          print('Email: ${authResult.email}');
-          print('Token: ${authResult.token}');
-          // Add more information as needed
-        } else {
-          print('Authentication failed');
-        }
-      } catch (e) {
-        print('Error during authentication: $e');
-      }
-    });
-  });
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Mock Auth Screen'),
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           crossAxisAlignment: CrossAxisAlignment.stretch,
+//           children: [
+//             TextField(
+//               controller: emailController,
+//               decoration: InputDecoration(labelText: 'Email'),
+//             ),
+//             SizedBox(height: 16),
+//             TextField(
+//               controller: passwordController,
+//               decoration: InputDecoration(labelText: 'Password'),
+//               obscureText: true,
+//             ),
+//             SizedBox(height: 16),
+//             ElevatedButton(
+//               onPressed: () async {
+//                 await widget.authService.initialize();
+//                 await widget.authService.signOut();
+//                 print('User signed out.');
+//               },
+//               child: Text('Sign Out'),
+//             ),
+//             ElevatedButton(
+//               onPressed: () async {
+//                 String email = emailController.text;
+//                 String password = passwordController.text;
+//                 await widget.authService
+//                     .createUserWithEmailAndPassword(email, password,);
+//                 print('User created with email: $email');
+//               },
+//               child: Text('Create User'),
+//             ),
+//             ElevatedButton(
+//               onPressed: () async {
+//                 String email = emailController.text;
+//                 String password = passwordController.text;
+//                 await widget.authService
+//                     .signInWithEmailAndPassword(email, password);
+//                 print('User signed in with email: $email');
+//               },
+//               child: Text('Sign In'),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }

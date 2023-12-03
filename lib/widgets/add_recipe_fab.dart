@@ -6,14 +6,12 @@ import 'package:recipe_app/views/client/create_recipe.dart';
 
 class AddRecipeFAB extends StatelessWidget {
   final String? currentScreen;
-  final id;
+
   final name;
-  final token;
+
   const AddRecipeFAB({
     Key? key,
-    required this.id,
     required this.name,
-    required this.token,
     this.currentScreen,
   }) : super(key: key);
 
@@ -26,14 +24,12 @@ class AddRecipeFAB extends StatelessWidget {
           Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (context) =>
-                      CreateRecipe(id: id, name: name, token: token)));
+                  builder: (context) => CreateRecipe(name: name)));
         } else if (currentScreen == 'admindashboard') {
           Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (context) =>
-                      AdminCreateRecipe(id: id, name: name, token: token)));
+                  builder: (context) => AdminCreateRecipe(name: name)));
         } else {
           // Handle other cases or do nothing if currentScreen is not provided
           debugPrint('Extended FAB pressed');

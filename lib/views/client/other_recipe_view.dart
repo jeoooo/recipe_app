@@ -124,8 +124,7 @@ class OtherRecipeView extends StatelessWidget {
                   onPressed: () {
                     // Add your logic for the first button
                     MaterialPageRoute(
-                        builder: (context) =>
-                            UpdateRecipe(id: id, name: name, token: token));
+                        builder: (context) => UpdateRecipe(id: id, name: name));
                   },
                   label: Text(
                     'Edit',
