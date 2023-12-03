@@ -3,23 +3,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/utils/pocketbase_conn.dart';
-import 'package:recipe_app/views/client/dashboard.dart';
-
+import 'package:recipe_app/controllers/recipe_controller.dart';
+import 'package:recipe_app/models/recipe_model.dart';
+import 'package:recipe_app/views/admin/admin_dashboard.dart';
 import 'package:recipe_app/widgets/CustomAlertDialog.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 
-class RecipeView extends StatelessWidget {
-  final name;
-  final token;
-  final auth_id;
-  final id;
-  const RecipeView(
-      {super.key,
-      required this.id,
-      required this.auth_id,
-      required this.name,
-      required this.token});
+class RecipeView extends StatefulWidget {
+  final String name;
+  final int id;
+
+  const RecipeView({Key? key, required this.id, required this.name})
+      : super(key: key);
+
+  @override
+  _RecipeViewState createState() => _RecipeViewState();
+}
+
+class _RecipeViewState extends State<RecipeView> {
+  final RecipeController _recipeController = RecipeController();
+  late Recipe _recipe;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecipeDetails();
+  }
+
+  Future<void> _fetchRecipeDetails() async {
+    try {
+      // Fetch recipe details using the RecipeController and widget.id
+      _recipe = (await _recipeController.getRecipeById(widget.id))!;
+
+      setState(() {});
+    } catch (e) {
+      // Handle any errors that might occur during the fetch
+      debugPrint("Error fetching recipe details: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +54,9 @@ class RecipeView extends StatelessWidget {
                 children: [
                   Stack(
                     children: <Widget>[
-                      // Use Stack and Positioned.fill for the image and gradient
                       Positioned.fill(
                         child: Image.network(
-                          'https://fakeimg.pl/600x400',
+                          _recipe.image ?? 'https://fakeimg.pl/600x400',
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -48,7 +68,7 @@ class RecipeView extends StatelessWidget {
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                Colors.black.withOpacity(0.7)
+                                Colors.black.withOpacity(0.7),
                               ],
                             ),
                           ),
@@ -57,9 +77,11 @@ class RecipeView extends StatelessWidget {
                       ElevatedButton.icon(
                         style: ButtonStyle(
                           backgroundColor:
-                              MaterialStatePropertyAll(Colors.transparent),
+                              MaterialStateProperty.all(Colors.transparent),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                         icon: Icon(
                           Icons.arrow_back,
                           size: 24.0,
@@ -72,21 +94,23 @@ class RecipeView extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 180.0, left: 20.0),
                         child: Text(
-                          'data',
+                          _recipe.name ?? 'Recipe Name',
                           style: GoogleFonts.paytoneOne(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 24,
-                              color: Colors.white),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 24,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 220.0, left: 20.0),
                         child: Text(
-                          'data',
+                          _recipe.createdBy ?? 'Created By',
                           style: GoogleFonts.lexend(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              color: Colors.white),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       Padding(
@@ -97,21 +121,23 @@ class RecipeView extends StatelessWidget {
                             SvgPicture.asset('assets/utensils.svg'),
                             SizedBox(width: 8),
                             Text(
-                              '4 Servings',
+                              '${_recipe.servings ?? 0} Servings',
                               style: GoogleFonts.lexend(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16,
-                                  color: Colors.white),
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
                             ),
                             SizedBox(width: 10),
                             SvgPicture.asset('assets/stopwatch.svg'),
                             SizedBox(width: 8),
                             Text(
-                              '4 Servings',
+                              '${_recipe.cookTime ?? 0} min',
                               style: GoogleFonts.lexend(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16,
-                                  color: Colors.white),
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
                             ),
                           ],
                         ),
@@ -130,7 +156,7 @@ class RecipeView extends StatelessWidget {
                 ElevatedButton.icon(
                   icon: Icon(Icons.edit),
                   onPressed: () {
-                    // Add your logic for the first button
+                    // Add your logic for the edit button
                   },
                   label: Text(
                     'Edit',
@@ -171,12 +197,9 @@ class RecipeView extends StatelessWidget {
 
                     // Proceed with the delete operation if the user confirmed
                     if (confirmDelete ?? false) {
-                      PocketBaseUtils.pocketBaseInstance
-                          .collection('recipe')
-                          .delete(id);
+                      await _recipeController.deleteRecipe(widget.id);
 
                       // Optionally show another dialog or perform other actions after deletion
-                      // ignore: use_build_context_synchronously
                       CustomAlertDialog.show(
                         context: context,
                         title: 'Deletion Successful',
@@ -184,13 +207,14 @@ class RecipeView extends StatelessWidget {
                       );
 
                       // Optionally navigate to another screen or perform other actions
-                      // ignore: use_build_context_synchronously
                       Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Dashboard(
-                                    userId: 'username',
-                                  )));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AdminDashboard(
+                            name: widget.name,
+                          ),
+                        ),
+                      );
                     } else {
                       // User canceled the delete operation, do nothing or perform additional actions
                     }
@@ -202,15 +226,16 @@ class RecipeView extends StatelessWidget {
             Text(
               'Ingredients',
               style: GoogleFonts.paytoneOne(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 24,
-                  color: Color(0xffCB4036)),
+                fontWeight: FontWeight.w400,
+                fontSize: 24,
+                color: Color(0xffCB4036),
+              ),
             ),
             SizedBox(
               height: 18,
             ),
             Text(
-              'data',
+              _recipe.ingredients?.join(', ') ?? 'Ingredients data',
               style: GoogleFonts.lexend(),
             ),
             SizedBox(
@@ -219,15 +244,16 @@ class RecipeView extends StatelessWidget {
             Text(
               'Procedure',
               style: GoogleFonts.paytoneOne(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 24,
-                  color: Color(0xffCB4036)),
+                fontWeight: FontWeight.w400,
+                fontSize: 24,
+                color: Color(0xffCB4036),
+              ),
             ),
             SizedBox(
               height: 18,
             ),
             Text(
-              'data',
+              _recipe.procedure ?? 'Procedure data',
               style: GoogleFonts.lexend(),
             ),
           ],

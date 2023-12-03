@@ -1,49 +1,47 @@
-import 'package:firebase_database/firebase_database.dart';
+import 'dart:async';
 import 'package:recipe_app/models/recipe_model.dart';
+import 'package:sqflite/sqflite.dart';
 
 class RecipeController {
-  final DatabaseReference _databaseReference =
-      FirebaseDatabase.instance.ref().child('recipes');
+  late Database _database;
 
-  Future<void> addRecipe(Recipe recipe) async {
-    try {
-      // Generate a unique ID for the new recipe
-      String recipeId = _databaseReference.push().key ?? '';
-
-      // Set the recipe data in the database
-      await _databaseReference.child(recipeId).set(recipe.toJson());
-    } catch (e) {
-      print('Error adding recipe: $e');
-    }
+  // Insert a new recipe
+  Future<void> insertRecipe(Recipe recipe) async {
+    await _database.insert('recipes', recipe.toMap());
   }
 
-  Future<Stream<DatabaseEvent>?> getRecipe(String recipeId) async {
-    try {
-      // Fetch the recipe data from the database based on recipe ID
-      DatabaseReference ref = FirebaseDatabase.instance.ref("recipes");
-      Stream<DatabaseEvent> stream = ref.onValue;
-      return stream;
-    } catch (e) {
-      print('Error fetching recipe: $e');
-      return null;
-    }
+  // Get all recipes
+  Future<List<Recipe>> getRecipes() async {
+    final List<Map<String, dynamic>> maps = await _database.query('recipes');
+    return List.generate(maps.length, (i) {
+      return Recipe.fromMap(maps[i]);
+    });
   }
 
-  Future<void> updateRecipe(String recipeId, Recipe updatedRecipe) async {
-    try {
-      // Update the recipe data in the database
-      await _databaseReference.child(recipeId).update(updatedRecipe.toJson());
-    } catch (e) {
-      print('Error updating recipe: $e');
+  Future<Recipe?> getRecipeById(int id) async {
+    final List<Map<String, dynamic>> maps = await _database.query(
+      'recipes',
+      where: 'recipe_id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isNotEmpty) {
+      // If a recipe with the specified id is found, return it
+      return Recipe.fromMap(maps.first);
     }
+
+    // If no recipe is found with the specified id, return null
+    return null;
   }
 
-  Future<void> deleteRecipe(String recipeId) async {
-    try {
-      // Delete the recipe from the database
-      await _databaseReference.child(recipeId).remove();
-    } catch (e) {
-      print('Error deleting recipe: $e');
-    }
+  // Update a recipe
+  Future<void> updateRecipe(Recipe recipe) async {
+    await _database.update('recipes', recipe.toMap(),
+        where: 'recipe_id = ?', whereArgs: [recipe.id]);
+  }
+
+  // Delete a recipe
+  Future<void> deleteRecipe(int id) async {
+    await _database.delete('recipes', where: 'recipe_id = ?', whereArgs: [id]);
   }
 }

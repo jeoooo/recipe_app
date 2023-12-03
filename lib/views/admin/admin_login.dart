@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recipe_app/views/client/dashboard.dart';
+import 'package:recipe_app/views/client/login.dart';
 import 'package:recipe_app/views/client/sign_up.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
@@ -157,7 +158,7 @@ class AdminLogin extends StatelessWidget {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AdminLogin(),
+                      builder: (context) => Login(),
                     ),
                   );
                 },
@@ -168,7 +169,7 @@ class AdminLogin extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Login as admin',
+                  'Login as client',
                   style: GoogleFonts.paytoneOne(
                     fontWeight: FontWeight.w400,
                     decoration: TextDecoration.underline,

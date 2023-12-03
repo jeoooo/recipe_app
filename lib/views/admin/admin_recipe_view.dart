@@ -3,16 +3,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/utils/pocketbase_conn.dart';
+import 'package:recipe_app/controllers/recipe_controller.dart';
+import 'package:recipe_app/models/recipe_model.dart';
 import 'package:recipe_app/views/admin/admin_dashboard.dart';
 import 'package:recipe_app/widgets/CustomAlertDialog.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 
-class AdminRecipeView extends StatelessWidget {
-  final name;
+class AdminRecipeView extends StatefulWidget {
+  final String name;
+  final int id;
 
-  final id;
-  const AdminRecipeView({super.key, required this.id, required this.name});
+  const AdminRecipeView({Key? key, required this.id, required this.name})
+      : super(key: key);
+
+  @override
+  _AdminRecipeViewState createState() => _AdminRecipeViewState();
+}
+
+class _AdminRecipeViewState extends State<AdminRecipeView> {
+  final RecipeController _recipeController = RecipeController();
+  late Recipe _recipe;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecipeDetails();
+  }
+
+  Future<void> _fetchRecipeDetails() async {
+    try {
+      // Fetch recipe details using the RecipeController and widget.id
+      _recipe = (await _recipeController.getRecipeById(widget.id))!;
+
+      setState(() {});
+    } catch (e) {
+      // Handle any errors that might occur during the fetch
+      debugPrint("Error fetching recipe details: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +54,9 @@ class AdminRecipeView extends StatelessWidget {
                 children: [
                   Stack(
                     children: <Widget>[
-                      // Use Stack and Positioned.fill for the image and gradient
                       Positioned.fill(
                         child: Image.network(
-                          'https://fakeimg.pl/600x400',
+                          _recipe.image ?? 'https://fakeimg.pl/600x400',
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -41,7 +68,7 @@ class AdminRecipeView extends StatelessWidget {
                               end: Alignment.bottomCenter,
                               colors: [
                                 Colors.transparent,
-                                Colors.black.withOpacity(0.7)
+                                Colors.black.withOpacity(0.7),
                               ],
                             ),
                           ),
@@ -50,9 +77,11 @@ class AdminRecipeView extends StatelessWidget {
                       ElevatedButton.icon(
                         style: ButtonStyle(
                           backgroundColor:
-                              MaterialStatePropertyAll(Colors.transparent),
+                              MaterialStateProperty.all(Colors.transparent),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                         icon: Icon(
                           Icons.arrow_back,
                           size: 24.0,
@@ -65,21 +94,23 @@ class AdminRecipeView extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 180.0, left: 20.0),
                         child: Text(
-                          'data',
+                          _recipe.name ?? 'Recipe Name',
                           style: GoogleFonts.paytoneOne(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 24,
-                              color: Colors.white),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 24,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 220.0, left: 20.0),
                         child: Text(
-                          'data',
+                          _recipe.createdBy ?? 'Created By',
                           style: GoogleFonts.lexend(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              color: Colors.white),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       Padding(
@@ -90,21 +121,23 @@ class AdminRecipeView extends StatelessWidget {
                             SvgPicture.asset('assets/utensils.svg'),
                             SizedBox(width: 8),
                             Text(
-                              '4 Servings',
+                              '${_recipe.servings ?? 0} Servings',
                               style: GoogleFonts.lexend(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16,
-                                  color: Colors.white),
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
                             ),
                             SizedBox(width: 10),
                             SvgPicture.asset('assets/stopwatch.svg'),
                             SizedBox(width: 8),
                             Text(
-                              '4 Servings',
+                              '${_recipe.cookTime ?? 0} min',
                               style: GoogleFonts.lexend(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16,
-                                  color: Colors.white),
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
                             ),
                           ],
                         ),
@@ -123,7 +156,7 @@ class AdminRecipeView extends StatelessWidget {
                 ElevatedButton.icon(
                   icon: Icon(Icons.edit),
                   onPressed: () {
-                    // Add your logic for the first button
+                    // Add your logic for the edit button
                   },
                   label: Text(
                     'Edit',
@@ -164,12 +197,9 @@ class AdminRecipeView extends StatelessWidget {
 
                     // Proceed with the delete operation if the user confirmed
                     if (confirmDelete ?? false) {
-                      PocketBaseUtils.pocketBaseInstance
-                          .collection('recipe')
-                          .delete(id);
+                      await _recipeController.deleteRecipe(widget.id);
 
                       // Optionally show another dialog or perform other actions after deletion
-                      // ignore: use_build_context_synchronously
                       CustomAlertDialog.show(
                         context: context,
                         title: 'Deletion Successful',
@@ -177,13 +207,14 @@ class AdminRecipeView extends StatelessWidget {
                       );
 
                       // Optionally navigate to another screen or perform other actions
-                      // ignore: use_build_context_synchronously
                       Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => AdminDashboard(
-                                    name: name,
-                                  )));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AdminDashboard(
+                            name: widget.name,
+                          ),
+                        ),
+                      );
                     } else {
                       // User canceled the delete operation, do nothing or perform additional actions
                     }
@@ -195,15 +226,16 @@ class AdminRecipeView extends StatelessWidget {
             Text(
               'Ingredients',
               style: GoogleFonts.paytoneOne(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 24,
-                  color: Color(0xffCB4036)),
+                fontWeight: FontWeight.w400,
+                fontSize: 24,
+                color: Color(0xffCB4036),
+              ),
             ),
             SizedBox(
               height: 18,
             ),
             Text(
-              'data',
+              _recipe.ingredients?.join(', ') ?? 'Ingredients data',
               style: GoogleFonts.lexend(),
             ),
             SizedBox(
@@ -212,15 +244,16 @@ class AdminRecipeView extends StatelessWidget {
             Text(
               'Procedure',
               style: GoogleFonts.paytoneOne(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 24,
-                  color: Color(0xffCB4036)),
+                fontWeight: FontWeight.w400,
+                fontSize: 24,
+                color: Color(0xffCB4036),
+              ),
             ),
             SizedBox(
               height: 18,
             ),
             Text(
-              'data',
+              _recipe.procedure ?? 'Procedure data',
               style: GoogleFonts.lexend(),
             ),
           ],

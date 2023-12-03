@@ -1,6 +1,3 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_typing_uninitialized_variables
-
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
@@ -36,12 +33,14 @@ class _DashboardState extends State<Dashboard> {
           {
             'id': '1',
             'name': 'Recipe 1',
-            'image': 'https://fakeimg.pl/325x150'
+            'image': 'https://fakeimg.pl/325x150',
+            'created_by': widget.userId,
           },
           {
             'id': '2',
             'name': 'Recipe 2',
-            'image': 'https://fakeimg.pl/325x150'
+            'image': 'https://fakeimg.pl/325x150',
+            'created_by': 'other_user',
           },
           // Add more recipes as needed
         ];
@@ -52,8 +51,24 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
+  List<Map<String, dynamic>> getDisplayedRecipes() {
+    if (ownRecipesSelected) {
+      // Show only own recipes
+      return recipeList
+          .where((recipe) => recipe['created_by'] == widget.userId)
+          .toList();
+    } else {
+      // Show other's recipes
+      return recipeList
+          .where((recipe) => recipe['created_by'] != widget.userId)
+          .toList();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<Map<String, dynamic>> displayedRecipes = getDisplayedRecipes();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar:
@@ -136,9 +151,9 @@ class _DashboardState extends State<Dashboard> {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: recipeList.length,
+                itemCount: displayedRecipes.length,
                 itemBuilder: (context, index) {
-                  var recipe = recipeList[index];
+                  var recipe = displayedRecipes[index];
 
                   return Center(
                     child: Column(
