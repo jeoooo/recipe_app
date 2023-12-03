@@ -43,7 +43,7 @@ The following dependencies are used in this project:
 
 - [file_picker](https://pub.dev/packages/file_picker) 
 
--[sqlflite](https://pub.dev/packages/sqflite)
+- [sqlflite](https://pub.dev/packages/sqflite)
 
 ## Additional Resources
 
