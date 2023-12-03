@@ -6,7 +6,7 @@ class Recipe {
   String image;
   String createdBy;
   String servings;
-  int cookTime;
+  String cookTime;
 
   Recipe(
       {this.id,

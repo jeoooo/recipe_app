@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:recipe_app/controllers/recipe_controller.dart';
 import 'package:recipe_app/models/recipe_model.dart';
 import 'package:recipe_app/views/admin/admin_dashboard.dart';
+import 'package:recipe_app/views/admin/admin_update_recipe.dart'; // Import the AdminUpdateRecipe screen
 import 'package:recipe_app/widgets/CustomAlertDialog.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 
@@ -156,7 +157,16 @@ class _AdminRecipeViewState extends State<AdminRecipeView> {
                 ElevatedButton.icon(
                   icon: Icon(Icons.edit),
                   onPressed: () {
-                    // Add your logic for the edit button
+                    // Navigate to the AdminUpdateRecipe screen with the recipe ID and name
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AdminUpdateRecipe(
+                          name: widget.name,
+                          id: widget.id, // Provide the actual id
+                        ),
+                      ),
+                    );
                   },
                   label: Text(
                     'Edit',
