@@ -1,4 +1,3 @@
-// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,12 +11,12 @@ import 'package:recipe_app/widgets/customForm_widget.dart';
 
 class UpdateRecipe extends StatefulWidget {
   final String name;
-  final int id; // Add id parameter
+  final int id;
 
   const UpdateRecipe({
     Key? key,
     required this.name,
-    required this.id, // Include id in the constructor
+    required this.id,
   }) : super(key: key);
 
   @override
@@ -27,11 +26,7 @@ class UpdateRecipe extends StatefulWidget {
 class _UpdateRecipeState extends State<UpdateRecipe> {
   final RecipeController _recipeController = RecipeController();
 
-  TextEditingController recipeNameController = TextEditingController();
-  TextEditingController servingsController = TextEditingController();
-  TextEditingController preparationTimeController = TextEditingController();
-  TextEditingController ingredientController = TextEditingController();
-  TextEditingController procedureController = TextEditingController();
+  TextEditingController _formController = TextEditingController();
 
   File? selectedFile;
 
@@ -46,21 +41,18 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
   }
 
   Future<void> _updateRecipe() async {
-    String recipeName = recipeNameController.text;
-    String servings = servingsController.text;
-    String preparationTime = preparationTimeController.text;
-    String ingredients = ingredientController.text;
-    String procedure = procedureController.text;
+    List<String> formValues = _formController.text.split('\n');
 
     Recipe updatedRecipe = Recipe(
-      id: widget.id, // Use the provided id
-      name: recipeName,
-      ingredients: ingredients.split('\n'),
-      procedure: procedure,
-      image: selectedFile?.path ?? 'No file selected',
+      id: widget.id,
+      name: formValues[0],
+      ingredients: formValues[4],
+      preparationTime: formValues[2],
+      procedure: formValues[5],
+      imageFileName: selectedFile?.path ?? 'No file selected',
       createdBy: widget.name,
-      servings: servings.toString(),
-      cookTime: preparationTime,
+      servings: formValues[1],
+      cookTime: formValues[2],
     );
 
     await _recipeController.updateRecipe(updatedRecipe);
@@ -69,7 +61,7 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
       context,
       MaterialPageRoute(
         builder: (context) => AdminDashboard(
-          name: widget.name,
+          userId: widget.name,
         ),
       ),
     );
@@ -86,21 +78,10 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomForm(
-                textfieldName: 'Recipe Name',
-                controller: recipeNameController,
-                formType: FormType.Normal,
-              ),
-              SizedBox(height: 10),
-              CustomForm(
-                textfieldName: 'Number of Servings',
-                controller: servingsController,
-                formType: FormType.NumberInput,
-              ),
-              SizedBox(height: 10),
-              CustomForm(
-                textfieldName: 'Preparation Time',
-                controller: preparationTimeController,
-                formType: FormType.Normal,
+                textfieldName:
+                    'Recipe Name\nNumber of Servings\nPreparation Time\nIngredients\nProcedure',
+                controller: _formController,
+                formType: FormType.MultiLineText,
               ),
               SizedBox(height: 10),
               Row(
@@ -124,18 +105,6 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
                     ),
                   ),
                 ],
-              ),
-              SizedBox(height: 10),
-              CustomForm(
-                textfieldName: 'Ingredients',
-                controller: ingredientController,
-                formType: FormType.MultiLineText,
-              ),
-              SizedBox(height: 10),
-              CustomForm(
-                textfieldName: 'Procedure',
-                controller: procedureController,
-                formType: FormType.MultiLineText,
               ),
               Button(
                 onPressed: _updateRecipe,

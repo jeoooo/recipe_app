@@ -1,21 +1,15 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, prefer_typing_uninitialized_variables
+// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/utils/pocketbase_conn_test_utils.dart';
-
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/recipe_card.dart';
-
 import '../../widgets/add_recipe_fab.dart';
 
 class AdminDashboard extends StatefulWidget {
-  final name;
+  final String userId;
 
-  const AdminDashboard({
-    Key? key,
-    required this.name,
-  }) : super(key: key);
+  const AdminDashboard({Key? key, required this.userId}) : super(key: key);
 
   @override
   _AdminDashboardState createState() => _AdminDashboardState();
@@ -23,8 +17,7 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   bool ownRecipesSelected = true;
-
-  List<dynamic> recipeList = []; // Store the list of recipes
+  List<Map<String, dynamic>> recipeList = []; // Store the list of recipes
 
   @override
   void initState() {
@@ -34,13 +27,25 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<void> _fetchRecipes() async {
     try {
-      // Fetch all records from the 'recipe' collection and sort by the 'created' field in descending order
-      final records = await PocketBaseTestUtils.pocketBaseTestInstance
-          .collection('recipe')
-          .getFullList(sort: '-created');
-
+      // Fetch recipes from the database based on user and filter criteria
+      // Update the recipeList in the state
       setState(() {
-        recipeList = records;
+        // Replace the below example data with your actual recipe data
+        recipeList = [
+          {
+            'id': '1',
+            'name': 'Recipe 1',
+            'image': 'https://fakeimg.pl/325x150',
+            'created_by': widget.userId,
+          },
+          {
+            'id': '2',
+            'name': 'Recipe 2',
+            'image': 'https://fakeimg.pl/325x150',
+            'created_by': 'other_user',
+          },
+          // Add more recipes as needed
+        ];
       });
     } catch (e) {
       // Handle any errors that might occur during the fetch
@@ -48,28 +53,28 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
-  List<dynamic> getDisplayedRecipes() {
+  List<Map<String, dynamic>> getDisplayedRecipes() {
     if (ownRecipesSelected) {
       // Show only own recipes
       return recipeList
-          .where((recipe) => recipe['created_by'] == widget.name)
+          .where((recipe) => recipe['created_by'] == widget.userId)
           .toList();
     } else {
       // Show other's recipes
       return recipeList
-          .where((recipe) => recipe['created_by'] != widget.name)
+          .where((recipe) => recipe['created_by'] != widget.userId)
           .toList();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    List<dynamic> displayedRecipes = getDisplayedRecipes();
+    List<Map<String, dynamic>> displayedRecipes = getDisplayedRecipes();
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar:
-          const CookyAppBar(color: Color(0xffCB4036), currentScreen: 'admin'),
+          const CookyAppBar(color: Color(0xffCB4036), currentScreen: 'client'),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -77,7 +82,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hi, ${widget.name}',
+                'Hi, ${widget.userId}',
                 style: GoogleFonts.paytoneOne(fontSize: 20),
               ),
               Text(
@@ -145,19 +150,35 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ],
                 ),
               ),
+              if (displayedRecipes.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    ownRecipesSelected
+                        ? 'You have not added any recipes yet.'
+                        : 'No recipes from others available.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: displayedRecipes.length,
                 itemBuilder: (context, index) {
+                  var recipe = displayedRecipes[index];
+
                   return Center(
                     child: Column(
                       children: [
                         RecipeCard(
-                            name: widget.name,
-                            id: displayedRecipes[index]['id'],
-                            recipeName: displayedRecipes[index]['recipe_name'],
-                            image: displayedRecipes[index]['image']),
+                          name: widget.userId,
+                          id: recipe['id'],
+                          recipeName: recipe['name'],
+                          image: recipe['image'],
+                        ),
                       ],
                     ),
                   );
@@ -167,8 +188,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         ),
       ),
-      floatingActionButton:
-          AddRecipeFAB(currentScreen: 'admin', name: widget.name),
+      floatingActionButton: AddRecipeFAB(),
     );
   }
 }

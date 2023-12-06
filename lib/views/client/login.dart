@@ -1,4 +1,5 @@
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, use_key_in_widget_constructors
+// Import necessary packages and files
+// ignore_for_file: use_build_context_synchronously, prefer_const_constructors
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -11,15 +12,13 @@ import 'package:recipe_app/widgets/customForm_widget.dart';
 import 'package:recipe_app/auth/auth.dart';
 
 class Login extends StatelessWidget {
-  const Login({
-    Key? key,
-  });
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Login({super.key});
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController emailController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -65,7 +64,7 @@ class Login extends StatelessWidget {
                       );
 
                       if (Auth.isAuthenticated()) {
-                        String userId = Auth.getUserId();
+                        String userId = Auth.getUserName();
 
                         Navigator.pushReplacement(
                           context,

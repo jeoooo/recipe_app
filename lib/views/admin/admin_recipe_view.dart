@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables, non_constant_identifier_names
+// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api, unused_import
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:recipe_app/controllers/recipe_controller.dart';
 import 'package:recipe_app/models/recipe_model.dart';
 import 'package:recipe_app/views/admin/admin_dashboard.dart';
-import 'package:recipe_app/views/admin/admin_update_recipe.dart'; // Import the AdminUpdateRecipe screen
+import 'package:recipe_app/views/client/dashboard.dart';
 import 'package:recipe_app/widgets/CustomAlertDialog.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 
@@ -33,12 +33,9 @@ class _AdminRecipeViewState extends State<AdminRecipeView> {
 
   Future<void> _fetchRecipeDetails() async {
     try {
-      // Fetch recipe details using the RecipeController and widget.id
       _recipe = (await _recipeController.getRecipeById(widget.id))!;
-
       setState(() {});
     } catch (e) {
-      // Handle any errors that might occur during the fetch
       debugPrint("Error fetching recipe details: $e");
     }
   }
@@ -57,7 +54,7 @@ class _AdminRecipeViewState extends State<AdminRecipeView> {
                     children: <Widget>[
                       Positioned.fill(
                         child: Image.network(
-                          _recipe.image ?? 'https://fakeimg.pl/600x400',
+                          _recipe.imageFileName ?? 'https://fakeimg.pl/600x400',
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -148,25 +145,14 @@ class _AdminRecipeViewState extends State<AdminRecipeView> {
                 ],
               ),
             ),
-            SizedBox(
-              height: 18,
-            ),
+            SizedBox(height: 18),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton.icon(
                   icon: Icon(Icons.edit),
                   onPressed: () {
-                    // Navigate to the AdminUpdateRecipe screen with the recipe ID and name
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AdminUpdateRecipe(
-                          name: widget.name,
-                          id: widget.id, // Provide the actual id
-                        ),
-                      ),
-                    );
+                    // Add your logic for the edit button
                   },
                   label: Text(
                     'Edit',
@@ -177,7 +163,6 @@ class _AdminRecipeViewState extends State<AdminRecipeView> {
                 ElevatedButton.icon(
                   icon: Icon(Icons.delete),
                   onPressed: () async {
-                    // Show a confirmation dialog
                     bool? confirmDelete = await showDialog<bool>(
                       context: context,
                       builder: (BuildContext context) {
@@ -205,34 +190,30 @@ class _AdminRecipeViewState extends State<AdminRecipeView> {
                       },
                     );
 
-                    // Proceed with the delete operation if the user confirmed
                     if (confirmDelete ?? false) {
                       await _recipeController.deleteRecipe(widget.id);
 
-                      // Optionally show another dialog or perform other actions after deletion
                       CustomAlertDialog.show(
                         context: context,
                         title: 'Deletion Successful',
                         message: 'The item has been deleted.',
                       );
 
-                      // Optionally navigate to another screen or perform other actions
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AdminDashboard(
-                            name: widget.name,
+                          builder: (context) => Dashboard(
+                            userId: widget.id.toString(),
                           ),
                         ),
                       );
-                    } else {
-                      // User canceled the delete operation, do nothing or perform additional actions
                     }
                   },
                   label: Text('Delete'),
                 )
               ],
             ),
+            SizedBox(height: 18),
             Text(
               'Ingredients',
               style: GoogleFonts.paytoneOne(
@@ -241,16 +222,12 @@ class _AdminRecipeViewState extends State<AdminRecipeView> {
                 color: Color(0xffCB4036),
               ),
             ),
-            SizedBox(
-              height: 18,
-            ),
+            SizedBox(height: 18),
             Text(
-              _recipe.ingredients?.join(', ') ?? 'Ingredients data',
+              _recipe.ingredients ?? 'Ingredients data',
               style: GoogleFonts.lexend(),
             ),
-            SizedBox(
-              height: 18,
-            ),
+            SizedBox(height: 18),
             Text(
               'Procedure',
               style: GoogleFonts.paytoneOne(
@@ -259,9 +236,7 @@ class _AdminRecipeViewState extends State<AdminRecipeView> {
                 color: Color(0xffCB4036),
               ),
             ),
-            SizedBox(
-              height: 18,
-            ),
+            SizedBox(height: 18),
             Text(
               _recipe.procedure ?? 'Procedure data',
               style: GoogleFonts.lexend(),

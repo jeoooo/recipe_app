@@ -1,13 +1,17 @@
+// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:recipe_app/models/recipe_model.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/recipe_card.dart';
-import '../../widgets/add_recipe_fab.dart';
+import 'package:recipe_app/widgets/add_recipe_fab.dart';
+import 'package:recipe_app/controllers/recipe_controller.dart';
 
 class Dashboard extends StatefulWidget {
   final String userId;
 
-  Dashboard({Key? key, required this.userId}) : super(key: key);
+  const Dashboard({Key? key, required this.userId}) : super(key: key);
 
   @override
   _DashboardState createState() => _DashboardState();
@@ -15,7 +19,7 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   bool ownRecipesSelected = true;
-  List<Map<String, dynamic>> recipeList = []; // Store the list of recipes
+  List<Recipe> recipeList = [];
 
   @override
   void initState() {
@@ -25,49 +29,30 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> _fetchRecipes() async {
     try {
-      // Fetch recipes from the database based on user and filter criteria
-      // Update the recipeList in the state
+      List<Recipe> recipes = await RecipeController().getAllRecipes();
       setState(() {
-        // Replace the below example data with your actual recipe data
-        recipeList = [
-          {
-            'id': '1',
-            'name': 'Recipe 1',
-            'image': 'https://fakeimg.pl/325x150',
-            'created_by': widget.userId,
-          },
-          {
-            'id': '2',
-            'name': 'Recipe 2',
-            'image': 'https://fakeimg.pl/325x150',
-            'created_by': 'other_user',
-          },
-          // Add more recipes as needed
-        ];
+        recipeList = recipes;
       });
     } catch (e) {
-      // Handle any errors that might occur during the fetch
-      debugPrint("Error fetching recipes: $e");
+      print("Error fetching recipes: $e");
     }
   }
 
-  List<Map<String, dynamic>> getDisplayedRecipes() {
+  List<Recipe> getDisplayedRecipes() {
     if (ownRecipesSelected) {
-      // Show only own recipes
       return recipeList
-          .where((recipe) => recipe['created_by'] == widget.userId)
+          .where((recipe) => recipe.createdBy == widget.userId)
           .toList();
     } else {
-      // Show other's recipes
       return recipeList
-          .where((recipe) => recipe['created_by'] != widget.userId)
+          .where((recipe) => recipe.createdBy != widget.userId)
           .toList();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, dynamic>> displayedRecipes = getDisplayedRecipes();
+    List<Recipe> displayedRecipes = getDisplayedRecipes();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -80,7 +65,7 @@ class _DashboardState extends State<Dashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hi, Welcome to Cooky',
+                'Hi, ${widget.userId}',
                 style: GoogleFonts.paytoneOne(fontSize: 20),
               ),
               Text(
@@ -148,6 +133,19 @@ class _DashboardState extends State<Dashboard> {
                   ],
                 ),
               ),
+              if (displayedRecipes.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    ownRecipesSelected
+                        ? 'You have not added any recipes yet.'
+                        : 'No recipes from others available.',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ),
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -159,10 +157,10 @@ class _DashboardState extends State<Dashboard> {
                     child: Column(
                       children: [
                         RecipeCard(
+                          id: recipe.id!,
+                          recipeName: recipe.name,
+                          image: recipe.imageFileName ?? '',
                           name: widget.userId,
-                          id: recipe['id'],
-                          recipeName: recipe['name'],
-                          image: recipe['image'],
                         ),
                       ],
                     ),
@@ -173,8 +171,7 @@ class _DashboardState extends State<Dashboard> {
           ),
         ),
       ),
-      floatingActionButton:
-          AddRecipeFAB(currentScreen: 'client', name: widget.userId),
+      floatingActionButton: AddRecipeFAB(currentScreen: 'dashboard'),
     );
   }
 }
