@@ -139,7 +139,7 @@ class AdminSignUp extends StatelessWidget {
                           nameController.text,
                           emailController.text,
                           passwordController.text,
-                          'client', // Assuming a default role of 'client'
+                          'admin', // Assuming a default role of 'client'
                         );
                         Navigator.pushReplacement(
                           context,

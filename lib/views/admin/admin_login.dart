@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/views/admin/admin_login.dart';
 import 'package:recipe_app/views/client/dashboard.dart';
 import 'package:recipe_app/views/client/login.dart';
 import 'package:recipe_app/views/client/sign_up.dart';
