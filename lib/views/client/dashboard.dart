@@ -1,19 +1,13 @@
-// Dashboard.dart
-
-// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/models/recipe_model.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/recipe_card.dart';
-import 'package:recipe_app/widgets/add_recipe_fab.dart';
-import 'package:recipe_app/controllers/recipe_controller.dart';
+import '../../widgets/add_recipe_fab.dart';
 
 class Dashboard extends StatefulWidget {
   final String userId;
 
-  const Dashboard({Key? key, required this.userId}) : super(key: key);
+  Dashboard({Key? key, required this.userId}) : super(key: key);
 
   @override
   _DashboardState createState() => _DashboardState();
@@ -21,8 +15,7 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   bool ownRecipesSelected = true;
-  List<Recipe> recipeList = [];
-  String? errorMessage;
+  List<Map<String, dynamic>> recipeList = []; // Store the list of recipes
 
   @override
   void initState() {
@@ -32,40 +25,54 @@ class _DashboardState extends State<Dashboard> {
 
   Future<void> _fetchRecipes() async {
     try {
-      List<Recipe> recipes = await RecipeController().getAllRecipes();
+      // Fetch recipes from the database based on user and filter criteria
+      // Update the recipeList in the state
       setState(() {
-        recipeList = recipes;
-        errorMessage = null;
+        // Replace the below example data with your actual recipe data
+        recipeList = [
+          {
+            'id': '1',
+            'name': 'Recipe 1',
+            'image': 'https://fakeimg.pl/325x150',
+            'created_by': widget.userId,
+          },
+          {
+            'id': '2',
+            'name': 'Recipe 2',
+            'image': 'https://fakeimg.pl/325x150',
+            'created_by': 'other_user',
+          },
+          // Add more recipes as needed
+        ];
       });
     } catch (e) {
-      setState(() {
-        errorMessage = 'Error fetching recipes: $e';
-      });
+      // Handle any errors that might occur during the fetch
+      debugPrint("Error fetching recipes: $e");
     }
   }
 
-  List<Recipe> getDisplayedRecipes() {
+  List<Map<String, dynamic>> getDisplayedRecipes() {
     if (ownRecipesSelected) {
+      // Show only own recipes
       return recipeList
-          .where((recipe) => recipe.createdBy == widget.userId)
+          .where((recipe) => recipe['created_by'] == widget.userId)
           .toList();
     } else {
+      // Show other's recipes
       return recipeList
-          .where((recipe) => recipe.createdBy != widget.userId)
+          .where((recipe) => recipe['created_by'] != widget.userId)
           .toList();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Recipe> displayedRecipes = getDisplayedRecipes();
+    List<Map<String, dynamic>> displayedRecipes = getDisplayedRecipes();
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: const CookyAppBar(
-        color: Color(0xffCB4036),
-        currentScreen: 'client',
-      ),
+      appBar:
+          const CookyAppBar(color: Color(0xffCB4036), currentScreen: 'client'),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -73,7 +80,7 @@ class _DashboardState extends State<Dashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hi, ${widget.userId}',
+                'Hi, Welcome to Cooky',
                 style: GoogleFonts.paytoneOne(fontSize: 20),
               ),
               Text(
@@ -111,6 +118,7 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
                     ),
+                    // Add some space between buttons
                     FilledButton(
                       style: ButtonStyle(
                         elevation: MaterialStateProperty.all(0),
@@ -140,30 +148,6 @@ class _DashboardState extends State<Dashboard> {
                   ],
                 ),
               ),
-              if (errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    errorMessage!,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-              if (displayedRecipes.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    ownRecipesSelected
-                        ? 'You have not added any recipes yet.'
-                        : 'No recipes from others available.',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ),
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -171,15 +155,17 @@ class _DashboardState extends State<Dashboard> {
                 itemBuilder: (context, index) {
                   var recipe = displayedRecipes[index];
 
-                  return Column(
-                    children: [
-                      RecipeCard(
-                        id: recipe.id!,
-                        recipeName: recipe.name,
-                        image: recipe.imageFileName ?? '',
-                        name: widget.userId,
-                      ),
-                    ],
+                  return Center(
+                    child: Column(
+                      children: [
+                        RecipeCard(
+                          name: widget.userId,
+                          id: recipe['id'],
+                          recipeName: recipe['name'],
+                          image: recipe['image'],
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),
@@ -187,7 +173,8 @@ class _DashboardState extends State<Dashboard> {
           ),
         ),
       ),
-      floatingActionButton: AddRecipeFAB(currentScreen: 'dashboard'),
+      floatingActionButton:
+          AddRecipeFAB(currentScreen: 'client', name: widget.userId),
     );
   }
 }
