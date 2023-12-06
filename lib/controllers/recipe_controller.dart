@@ -1,35 +1,17 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:recipe_app/db/db_conn.dart';
+import 'dart:async';
 import 'package:recipe_app/models/recipe_model.dart';
+import 'package:sqflite/sqflite.dart';
 
 class RecipeController {
   late Database _database;
-  late bool _isDatabaseInitialized;
 
-  RecipeController() {
-    _isDatabaseInitialized = false;
-    _initDatabase();
-  }
-
-  Future<void> _initDatabase() async {
-    final DatabaseHelper dbHelper = DatabaseHelper();
-    _database = await dbHelper.database;
-    _isDatabaseInitialized = true;
-  }
-
-  Future<void> _ensureDatabaseInitialized() async {
-    if (!_isDatabaseInitialized) {
-      await _initDatabase();
-    }
-  }
-
+  // Insert a new recipe
   Future<void> insertRecipe(Recipe recipe) async {
-    await _ensureDatabaseInitialized();
-    await _database.insert("recipes", recipe.toMap());
+    await _database.insert('recipes', recipe.toMap());
   }
 
-  Future<List<Recipe>> getAllRecipes() async {
-    await _ensureDatabaseInitialized();
+  // Get all recipes
+  Future<List<Recipe>> getRecipes() async {
     final List<Map<String, dynamic>> maps = await _database.query('recipes');
     return List.generate(maps.length, (i) {
       return Recipe.fromMap(maps[i]);
@@ -37,7 +19,6 @@ class RecipeController {
   }
 
   Future<Recipe?> getRecipeById(int id) async {
-    await _ensureDatabaseInitialized();
     final List<Map<String, dynamic>> maps = await _database.query(
       'recipes',
       where: 'recipe_id = ?',
@@ -45,26 +26,22 @@ class RecipeController {
     );
 
     if (maps.isNotEmpty) {
+      // If a recipe with the specified id is found, return it
       return Recipe.fromMap(maps.first);
     }
 
+    // If no recipe is found with the specified id, return null
     return null;
   }
 
+  // Update a recipe
   Future<void> updateRecipe(Recipe recipe) async {
-    await _ensureDatabaseInitialized();
     await _database.update('recipes', recipe.toMap(),
         where: 'recipe_id = ?', whereArgs: [recipe.id]);
   }
 
+  // Delete a recipe
   Future<void> deleteRecipe(int id) async {
-    await _ensureDatabaseInitialized();
     await _database.delete('recipes', where: 'recipe_id = ?', whereArgs: [id]);
-  }
-
-  Future<List<Map<String, dynamic>>> getImageAndRecipeNames() async {
-    await _ensureDatabaseInitialized();
-    return await _database
-        .rawQuery('SELECT imageFileName, recipe_name FROM recipes');
   }
 }

@@ -1,5 +1,4 @@
-import 'package:sqflite/sqflite.dart';
-import 'package:recipe_app/db/db_conn.dart';
+// auth.dart
 
 class User {
   String? userId;
@@ -9,7 +8,6 @@ class User {
   String role;
 
   User({
-    this.userId,
     required this.name,
     required this.email,
     required this.password,
@@ -18,78 +16,56 @@ class User {
 }
 
 class Auth {
-  static final DatabaseHelper _databaseHelper = DatabaseHelper();
+  static List<User> users = []; // Simulated user database
 
   static User? currentUser;
 
   static Future<bool> login(String email, String password) async {
-    Database db = await _databaseHelper.database;
+    // Perform authentication logic, e.g., check credentials against a database
+    // If authentication is successful, set the currentUser
+    // Otherwise, return false
 
-    List<Map<String, dynamic>> users = await db.query(
-      '"users"',
-      where: 'email_address = ? AND password = ?',
-      whereArgs: [email, password],
-    );
-
-    if (users.isNotEmpty) {
-      currentUser = User(
-        userId: users[0]['user_id'].toString(),
-        name: users[0]['full_name'].toString(),
-        email: users[0]['email_address'].toString(),
-        password: users[0]['password'].toString(),
-        role: users[0]['role'].toString(),
-      );
-
-      printUserDetails(currentUser);
-      return true;
+    // For simplicity, we'll just check against hardcoded values
+    for (var user in users) {
+      if (user.email == email && user.password == password) {
+        currentUser = user;
+        return true;
+      }
     }
-
-    print('Login failed. Invalid email or password.');
     return false;
   }
 
   static Future<bool> signup(
       String name, String email, String password, String role) async {
-    try {
-      Database db = await _databaseHelper.database;
+    // Perform signup logic, e.g., add user to the database
+    // If signup is successful, set the currentUser
+    // Otherwise, return false
 
-      await db.insert(
-        '"users"',
-        {
-          'full_name': name,
-          'email_address': email,
-          'password': password,
-          'role': role,
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-
-      print('User successfully registered.');
-      return true;
-    } catch (e) {
-      print('Registration failed. $e');
-      return false;
-    }
+    // For simplicity, we'll add the user to the simulated user database
+    // In a real-world scenario, you would perform database operations
+    var newUser = User(
+      name: name,
+      email: email,
+      password: password,
+      role: role,
+    );
+    users.add(newUser);
+    currentUser = newUser;
+    return true;
   }
 
-  static void printUserDetails(User? user) {
-    if (user != null) {
-      print('User Details:');
-      print('User ID: ${user.userId}');
-      print('Name: ${user.name}');
-      print('Email: ${user.email}');
-      print('Password: ${user.password}');
-      print('Role: ${user.role}');
-    } else {
-      print('No user details available.');
-    }
+  static void logout() {
+    // Clear the currentUser when the user logs out
+    currentUser = null;
   }
 
   static bool isAuthenticated() {
+    // Check if a user is authenticated (currentUser is not null)
     return currentUser != null;
   }
 
-  static String getUserName() {
-    return currentUser?.name ?? "";
+  static String getUserId() {
+    // Get the user ID of the authenticated user
+    return currentUser?.userId ?? "";
   }
 }

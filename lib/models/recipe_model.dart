@@ -3,7 +3,7 @@ class Recipe {
   String name;
   String ingredients;
   String procedure;
-  String? imageFileName;
+  String? imageFileName; // Store the filename instead of the File object
   String createdBy;
   String servings;
   String cookTime;
@@ -21,6 +21,7 @@ class Recipe {
     required this.preparationTime,
   });
 
+  // Convert a map to a Recipe object
   factory Recipe.fromMap(Map<String, dynamic> map) {
     return Recipe(
       id: map['recipe_id'],
@@ -35,8 +36,10 @@ class Recipe {
     );
   }
 
+  // Convert a Recipe object to a map
   Map<String, dynamic> toMap() {
     return {
+      'recipe_id': id,
       'recipe_name': name,
       'ingredients': ingredients,
       'procedure': procedure,

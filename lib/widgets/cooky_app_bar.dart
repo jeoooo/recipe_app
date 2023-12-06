@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/utils/pocketbase_conn.dart';
+
 import 'package:recipe_app/views/admin/admin_login.dart';
 import 'package:recipe_app/views/client/login.dart';
 
@@ -54,7 +54,6 @@ class CookyAppBar extends StatelessWidget implements PreferredSizeWidget {
               // Implement your logout logic here
               if (currentScreen == 'client') {
                 // Navigate to login screen
-                PocketBaseUtils.pocketBaseInstance.authStore.clear();
                 Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (context) => Login()));
               } else if (currentScreen == 'admin') {
