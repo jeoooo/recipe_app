@@ -1,24 +1,23 @@
+// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:recipe_app/controllers/recipe_controller.dart';
 import 'package:recipe_app/models/recipe_model.dart';
 import 'package:recipe_app/views/admin/admin_dashboard.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
-import 'package:recipe_app/auth/auth.dart';
 
 class AdminUpdateRecipe extends StatefulWidget {
   final String name;
-  final int id;
+  final int id; // Add id parameter
 
   const AdminUpdateRecipe({
     Key? key,
     required this.name,
-    required this.id,
+    required this.id, // Include id in the constructor
   }) : super(key: key);
 
   @override
@@ -26,16 +25,15 @@ class AdminUpdateRecipe extends StatefulWidget {
 }
 
 class _AdminUpdateRecipeState extends State<AdminUpdateRecipe> {
+  final RecipeController _recipeController = RecipeController();
+
   TextEditingController recipeNameController = TextEditingController();
   TextEditingController servingsController = TextEditingController();
   TextEditingController preparationTimeController = TextEditingController();
-  TextEditingController cookTimeController = TextEditingController();
   TextEditingController ingredientController = TextEditingController();
   TextEditingController procedureController = TextEditingController();
 
   File? selectedFile;
-
-  RecipeController recipeController = RecipeController();
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -47,13 +45,34 @@ class _AdminUpdateRecipeState extends State<AdminUpdateRecipe> {
     }
   }
 
-  Future<void> _saveImageFile(String fileName) async {
-    final appDocumentsDirectory = await getApplicationDocumentsDirectory();
-    final imageDirectory = Directory('${appDocumentsDirectory.path}/images');
-    final imagePath = "${imageDirectory.path}/$fileName";
+  Future<void> _updateRecipe() async {
+    String recipeName = recipeNameController.text;
+    String servings = servingsController.text;
+    String preparationTime = preparationTimeController.text;
+    String ingredients = ingredientController.text;
+    String procedure = procedureController.text;
 
-    await imageDirectory.create(recursive: true);
-    await selectedFile!.copy(imagePath);
+    Recipe updatedRecipe = Recipe(
+      id: widget.id, // Use the provided id
+      name: recipeName,
+      ingredients: ingredients.split('\n'),
+      procedure: procedure,
+      image: selectedFile?.path ?? 'No file selected',
+      createdBy: widget.name,
+      servings: servings.toString(),
+      cookTime: preparationTime,
+    );
+
+    await _recipeController.updateRecipe(updatedRecipe);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AdminDashboard(
+          name: widget.name,
+        ),
+      ),
+    );
   }
 
   @override
@@ -81,12 +100,6 @@ class _AdminUpdateRecipeState extends State<AdminUpdateRecipe> {
               CustomForm(
                 textfieldName: 'Preparation Time',
                 controller: preparationTimeController,
-                formType: FormType.Normal,
-              ),
-              SizedBox(height: 10),
-              CustomForm(
-                textfieldName: 'Cook Time',
-                controller: cookTimeController,
                 formType: FormType.Normal,
               ),
               SizedBox(height: 10),
@@ -125,42 +138,7 @@ class _AdminUpdateRecipeState extends State<AdminUpdateRecipe> {
                 formType: FormType.MultiLineText,
               ),
               Button(
-                onPressed: () async {
-                  User? currentUser = Auth.currentUser;
-
-                  if (currentUser != null) {
-                    String? filename = selectedFile?.path.split('/').last;
-
-                    if (filename != null) {
-                      await _saveImageFile(filename);
-                    }
-
-                    Recipe updatedRecipe = Recipe(
-                      id: widget.id,
-                      name: recipeNameController.text,
-                      servings: servingsController.text,
-                      preparationTime: preparationTimeController.text,
-                      cookTime: cookTimeController.text,
-                      ingredients: ingredientController.text,
-                      procedure: procedureController.text,
-                      imageFileName: filename,
-                      createdBy: currentUser.userId ?? '',
-                    );
-
-                    await recipeController.updateRecipe(updatedRecipe);
-
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AdminDashboard(
-                          userId: currentUser.userId ?? '',
-                        ),
-                      ),
-                    );
-                  } else {
-                    print('User not logged in.');
-                  }
-                },
+                onPressed: _updateRecipe,
                 buttonText: 'Update Recipe',
               ),
             ],
