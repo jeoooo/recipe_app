@@ -1,12 +1,13 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/views/admin/admin_recipe_view.dart';
 
 class RecipeCard extends StatelessWidget {
   final int id;
-  final String name;
   final String recipeName;
   final String image;
+  final String name;
 
   const RecipeCard({
     Key? key,
@@ -20,15 +21,9 @@ class RecipeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AdminRecipeView(
-              id: id,
-              name: name,
-            ),
-          ),
-        );
+        // Handle tap, you might want to navigate to a detailed view
+        // For now, let's print the selected recipe name
+        print('Selected Recipe: $recipeName');
       },
       child: Card(
         elevation: 0,
@@ -37,21 +32,23 @@ class RecipeCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(15.0),
-              child: Image.network(
-                image,
-                height: 150, // Adjusted height for the image
-                width: double.infinity, // Make the image take full width
-                fit: BoxFit.cover, // Cover the entire container
+              child: Image.asset(
+                'assets/$image', // Assuming images are in the 'assets' folder
+                height: 150,
+                width: double.infinity,
+                fit: BoxFit.cover,
               ),
             ),
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(
+                vertical: 12.0,
+                horizontal: 8.0,
+              ),
               child: Text(
                 recipeName,
                 style: GoogleFonts.lexend(fontWeight: FontWeight.w600),
                 overflow: TextOverflow.ellipsis,
-                maxLines: 2, // Show a maximum of 2 lines for the recipe name
+                maxLines: 2,
               ),
             ),
           ],

@@ -1,8 +1,9 @@
-// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables, use_build_context_synchronously, avoid_print
+// create_recipe.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:recipe_app/controllers/recipe_controller.dart';
 import 'package:recipe_app/models/recipe_model.dart';
 import 'package:recipe_app/views/client/dashboard.dart';
@@ -40,6 +41,15 @@ class _AdminCreateRecipeState extends State<AdminCreateRecipe> {
     }
   }
 
+  Future<void> _saveImageFile(String fileName) async {
+    final appDocumentsDirectory = await getApplicationDocumentsDirectory();
+    final imageDirectory = Directory('${appDocumentsDirectory.path}/images');
+    final imagePath = "${imageDirectory.path}/$fileName";
+
+    await imageDirectory.create(recursive: true);
+    await selectedFile!.copy(imagePath);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,39 +65,31 @@ class _AdminCreateRecipeState extends State<AdminCreateRecipe> {
                 controller: recipeNameController,
                 formType: FormType.Normal,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Number of Servings',
                 controller: servingsController,
                 formType: FormType.NumberInput,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Preparation Time',
                 controller: preparationTimeController,
                 formType: FormType.Normal,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Cook Time',
                 controller: cookTimeController,
                 formType: FormType.Normal,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               Row(
                 children: [
                   ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor:
-                          MaterialStatePropertyAll(Color(0xffCB4036)),
+                          MaterialStateProperty.all(Color(0xffCB4036)),
                     ),
                     onPressed: _pickFile,
                     child: Text(
@@ -104,17 +106,13 @@ class _AdminCreateRecipeState extends State<AdminCreateRecipe> {
                   ),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Ingredients',
                 controller: ingredientController,
                 formType: FormType.MultiLineText,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Procedure',
                 controller: procedureController,
@@ -125,8 +123,11 @@ class _AdminCreateRecipeState extends State<AdminCreateRecipe> {
                   User? currentUser = Auth.currentUser;
 
                   if (currentUser != null) {
-                    // Get the filename from the path
                     String? filename = selectedFile?.path.split('/').last;
+
+                    if (filename != null) {
+                      await _saveImageFile(filename);
+                    }
 
                     Recipe newRecipe = Recipe(
                       name: recipeNameController.text,
@@ -138,14 +139,6 @@ class _AdminCreateRecipeState extends State<AdminCreateRecipe> {
                       imageFileName: filename,
                       createdBy: currentUser.userId ?? '',
                     );
-
-                    // Save the image to the app's local storage
-                    if (selectedFile != null) {
-                      final imageDirectory = Directory("YOUR_IMAGE_DIRECTORY");
-                      final imagePath = "${imageDirectory.path}/$filename";
-
-                      await selectedFile!.copy(imagePath);
-                    }
 
                     await recipeController.insertRecipe(newRecipe);
 

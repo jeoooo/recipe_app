@@ -1,3 +1,5 @@
+// Dashboard.dart
+
 // ignore_for_file: prefer_const_constructors, library_private_types_in_public_api
 
 import 'package:flutter/material.dart';
@@ -20,6 +22,7 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   bool ownRecipesSelected = true;
   List<Recipe> recipeList = [];
+  String? errorMessage;
 
   @override
   void initState() {
@@ -32,9 +35,12 @@ class _DashboardState extends State<Dashboard> {
       List<Recipe> recipes = await RecipeController().getAllRecipes();
       setState(() {
         recipeList = recipes;
+        errorMessage = null;
       });
     } catch (e) {
-      print("Error fetching recipes: $e");
+      setState(() {
+        errorMessage = 'Error fetching recipes: $e';
+      });
     }
   }
 
@@ -56,8 +62,10 @@ class _DashboardState extends State<Dashboard> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar:
-          const CookyAppBar(color: Color(0xffCB4036), currentScreen: 'client'),
+      appBar: const CookyAppBar(
+        color: Color(0xffCB4036),
+        currentScreen: 'client',
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -103,7 +111,6 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
                     ),
-                    // Add some space between buttons
                     FilledButton(
                       style: ButtonStyle(
                         elevation: MaterialStateProperty.all(0),
@@ -133,6 +140,17 @@ class _DashboardState extends State<Dashboard> {
                   ],
                 ),
               ),
+              if (errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    errorMessage!,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
               if (displayedRecipes.isEmpty)
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -153,17 +171,15 @@ class _DashboardState extends State<Dashboard> {
                 itemBuilder: (context, index) {
                   var recipe = displayedRecipes[index];
 
-                  return Center(
-                    child: Column(
-                      children: [
-                        RecipeCard(
-                          id: recipe.id!,
-                          recipeName: recipe.name,
-                          image: recipe.imageFileName ?? '',
-                          name: widget.userId,
-                        ),
-                      ],
-                    ),
+                  return Column(
+                    children: [
+                      RecipeCard(
+                        id: recipe.id!,
+                        recipeName: recipe.name,
+                        image: recipe.imageFileName ?? '',
+                        name: widget.userId,
+                      ),
+                    ],
                   );
                 },
               ),

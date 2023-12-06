@@ -61,4 +61,10 @@ class RecipeController {
     await _ensureDatabaseInitialized();
     await _database.delete('recipes', where: 'recipe_id = ?', whereArgs: [id]);
   }
+
+  Future<List<Map<String, dynamic>>> getImageAndRecipeNames() async {
+    await _ensureDatabaseInitialized();
+    return await _database
+        .rawQuery('SELECT imageFileName, recipe_name FROM recipes');
+  }
 }

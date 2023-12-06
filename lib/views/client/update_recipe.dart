@@ -2,12 +2,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:recipe_app/controllers/recipe_controller.dart';
 import 'package:recipe_app/models/recipe_model.dart';
 import 'package:recipe_app/views/admin/admin_dashboard.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
+import 'package:recipe_app/auth/auth.dart';
 
 class UpdateRecipe extends StatefulWidget {
   final String name;
@@ -24,11 +26,16 @@ class UpdateRecipe extends StatefulWidget {
 }
 
 class _UpdateRecipeState extends State<UpdateRecipe> {
-  final RecipeController _recipeController = RecipeController();
-
-  TextEditingController _formController = TextEditingController();
+  TextEditingController recipeNameController = TextEditingController();
+  TextEditingController servingsController = TextEditingController();
+  TextEditingController preparationTimeController = TextEditingController();
+  TextEditingController cookTimeController = TextEditingController();
+  TextEditingController ingredientController = TextEditingController();
+  TextEditingController procedureController = TextEditingController();
 
   File? selectedFile;
+
+  RecipeController recipeController = RecipeController();
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -40,31 +47,13 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
     }
   }
 
-  Future<void> _updateRecipe() async {
-    List<String> formValues = _formController.text.split('\n');
+  Future<void> _saveImageFile(String fileName) async {
+    final appDocumentsDirectory = await getApplicationDocumentsDirectory();
+    final imageDirectory = Directory('${appDocumentsDirectory.path}/images');
+    final imagePath = "${imageDirectory.path}/$fileName";
 
-    Recipe updatedRecipe = Recipe(
-      id: widget.id,
-      name: formValues[0],
-      ingredients: formValues[4],
-      preparationTime: formValues[2],
-      procedure: formValues[5],
-      imageFileName: selectedFile?.path ?? 'No file selected',
-      createdBy: widget.name,
-      servings: formValues[1],
-      cookTime: formValues[2],
-    );
-
-    await _recipeController.updateRecipe(updatedRecipe);
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AdminDashboard(
-          userId: widget.name,
-        ),
-      ),
-    );
+    await imageDirectory.create(recursive: true);
+    await selectedFile!.copy(imagePath);
   }
 
   @override
@@ -78,10 +67,27 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomForm(
-                textfieldName:
-                    'Recipe Name\nNumber of Servings\nPreparation Time\nIngredients\nProcedure',
-                controller: _formController,
-                formType: FormType.MultiLineText,
+                textfieldName: 'Recipe Name',
+                controller: recipeNameController,
+                formType: FormType.Normal,
+              ),
+              SizedBox(height: 10),
+              CustomForm(
+                textfieldName: 'Number of Servings',
+                controller: servingsController,
+                formType: FormType.NumberInput,
+              ),
+              SizedBox(height: 10),
+              CustomForm(
+                textfieldName: 'Preparation Time',
+                controller: preparationTimeController,
+                formType: FormType.Normal,
+              ),
+              SizedBox(height: 10),
+              CustomForm(
+                textfieldName: 'Cook Time',
+                controller: cookTimeController,
+                formType: FormType.Normal,
               ),
               SizedBox(height: 10),
               Row(
@@ -106,8 +112,55 @@ class _UpdateRecipeState extends State<UpdateRecipe> {
                   ),
                 ],
               ),
+              SizedBox(height: 10),
+              CustomForm(
+                textfieldName: 'Ingredients',
+                controller: ingredientController,
+                formType: FormType.MultiLineText,
+              ),
+              SizedBox(height: 10),
+              CustomForm(
+                textfieldName: 'Procedure',
+                controller: procedureController,
+                formType: FormType.MultiLineText,
+              ),
               Button(
-                onPressed: _updateRecipe,
+                onPressed: () async {
+                  User? currentUser = Auth.currentUser;
+
+                  if (currentUser != null) {
+                    String? filename = selectedFile?.path.split('/').last;
+
+                    if (filename != null) {
+                      await _saveImageFile(filename);
+                    }
+
+                    Recipe updatedRecipe = Recipe(
+                      id: widget.id,
+                      name: recipeNameController.text,
+                      servings: servingsController.text,
+                      preparationTime: preparationTimeController.text,
+                      cookTime: cookTimeController.text,
+                      ingredients: ingredientController.text,
+                      procedure: procedureController.text,
+                      imageFileName: filename,
+                      createdBy: currentUser.userId ?? '',
+                    );
+
+                    await recipeController.updateRecipe(updatedRecipe);
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AdminDashboard(
+                          userId: currentUser.userId ?? '',
+                        ),
+                      ),
+                    );
+                  } else {
+                    print('User not logged in.');
+                  }
+                },
                 buttonText: 'Update Recipe',
               ),
             ],

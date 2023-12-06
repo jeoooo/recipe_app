@@ -4,9 +4,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:recipe_app/views/admin/admin_sign_up.dart';
+import 'package:recipe_app/views/admin/admin_login.dart';
 import 'package:recipe_app/views/client/dashboard.dart';
 import 'package:recipe_app/views/client/login.dart';
+import 'package:recipe_app/views/client/sign_up.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
 import 'package:recipe_app/auth/auth.dart';
@@ -131,7 +132,7 @@ class AdminLogin extends StatelessWidget {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => AdminSignUp(),
+                            builder: (context) => SignUp(),
                           ),
                         );
                       },
