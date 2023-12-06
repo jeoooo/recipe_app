@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:recipe_app/auth/auth.dart';
+
 import 'package:recipe_app/views/client/login.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
@@ -14,6 +15,7 @@ class AdminSignUp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // final Auth authService = Auth(); // Replace with your SQLite service
     TextEditingController nameController = TextEditingController();
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();
@@ -137,7 +139,7 @@ class AdminSignUp extends StatelessWidget {
                           nameController.text,
                           emailController.text,
                           passwordController.text,
-                          'admin', // Assuming a default role of 'client'
+                          'client', // Assuming a default role of 'client'
                         );
                         Navigator.pushReplacement(
                           context,

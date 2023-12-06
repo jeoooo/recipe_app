@@ -15,7 +15,7 @@ class SignUp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Auth authService = Auth(); // Replace with your SQLite service
+    // final Auth authService = Auth(); // Replace with your SQLite service
     TextEditingController nameController = TextEditingController();
     TextEditingController emailController = TextEditingController();
     TextEditingController passwordController = TextEditingController();

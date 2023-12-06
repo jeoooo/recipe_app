@@ -1,37 +1,35 @@
-// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables
+// create_recipe.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
-
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
-
-import 'package:recipe_app/utils/pocketbase_conn.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:recipe_app/controllers/recipe_controller.dart';
+import 'package:recipe_app/models/recipe_model.dart';
 import 'package:recipe_app/views/client/dashboard.dart';
 import 'package:recipe_app/widgets/button_widget.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
 import 'package:recipe_app/widgets/customForm_widget.dart';
-import 'package:http/http.dart' as http;
+import 'package:recipe_app/auth/auth.dart';
 
 class CreateRecipe extends StatefulWidget {
-  final name;
-
-  // ignore: use_key_in_widget_constructors
-  const CreateRecipe({Key? key, required this.name});
+  const CreateRecipe({Key? key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _CreateRecipeState createState() => _CreateRecipeState();
 }
 
 class _CreateRecipeState extends State<CreateRecipe> {
-  // Declare controllers as instance variables
   TextEditingController recipeNameController = TextEditingController();
   TextEditingController servingsController = TextEditingController();
   TextEditingController preparationTimeController = TextEditingController();
+  TextEditingController cookTimeController = TextEditingController();
   TextEditingController ingredientController = TextEditingController();
   TextEditingController procedureController = TextEditingController();
 
   File? selectedFile;
+
+  RecipeController recipeController = RecipeController();
 
   Future<void> _pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
@@ -43,10 +41,17 @@ class _CreateRecipeState extends State<CreateRecipe> {
     }
   }
 
+  Future<void> _saveImageFile(String fileName) async {
+    final appDocumentsDirectory = await getApplicationDocumentsDirectory();
+    final imageDirectory = Directory('${appDocumentsDirectory.path}/images');
+    final imagePath = "${imageDirectory.path}/$fileName";
+
+    await imageDirectory.create(recursive: true);
+    await selectedFile!.copy(imagePath);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final pb = PocketBaseUtils.pocketBaseInstance;
-
     return Scaffold(
       appBar: CookyAppBar(color: Color(0xffCB4036)),
       body: SingleChildScrollView(
@@ -60,31 +65,31 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 controller: recipeNameController,
                 formType: FormType.Normal,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Number of Servings',
                 controller: servingsController,
                 formType: FormType.NumberInput,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Preparation Time',
                 controller: preparationTimeController,
                 formType: FormType.Normal,
               ),
-              SizedBox(
-                height: 10,
+              SizedBox(height: 10),
+              CustomForm(
+                textfieldName: 'Cook Time',
+                controller: cookTimeController,
+                formType: FormType.Normal,
               ),
+              SizedBox(height: 10),
               Row(
                 children: [
                   ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor:
-                          MaterialStatePropertyAll(Color(0xffCB4036)),
+                          MaterialStateProperty.all(Color(0xffCB4036)),
                     ),
                     onPressed: _pickFile,
                     child: Text(
@@ -101,17 +106,13 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   ),
                 ],
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Ingredients',
                 controller: ingredientController,
                 formType: FormType.MultiLineText,
               ),
-              SizedBox(
-                height: 10,
-              ),
+              SizedBox(height: 10),
               CustomForm(
                 textfieldName: 'Procedure',
                 controller: procedureController,
@@ -119,30 +120,39 @@ class _CreateRecipeState extends State<CreateRecipe> {
               ),
               Button(
                 onPressed: () async {
-                  final body = <String, dynamic>{
-                    "recipe_name": recipeNameController.text,
-                    "recipe_servings": servingsController.text,
-                    "recipe_preparation_time": preparationTimeController.text,
-                    "ingredients": ingredientController.text,
-                    "procedure": procedureController.text
-                  };
+                  User? currentUser = Auth.currentUser;
 
-                  final multipartFile = http.MultipartFile.fromBytes(
-                      'image', await File(selectedFile!.path).readAsBytes(),
-                      filename: selectedFile!.path);
-                  await pb
-                      .collection('recipe')
-                      .create(body: body, files: [multipartFile]);
+                  if (currentUser != null) {
+                    String? filename = selectedFile?.path.split('/').last;
 
-                  // ignore: use_build_context_synchronously
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Dashboard(
-                        userId: 'user_id',
+                    if (filename != null) {
+                      await _saveImageFile(filename);
+                    }
+
+                    Recipe newRecipe = Recipe(
+                      name: recipeNameController.text,
+                      servings: servingsController.text,
+                      preparationTime: preparationTimeController.text,
+                      cookTime: cookTimeController.text,
+                      ingredients: ingredientController.text,
+                      procedure: procedureController.text,
+                      imageFileName: filename,
+                      createdBy: currentUser.userId ?? '',
+                    );
+
+                    await recipeController.insertRecipe(newRecipe);
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Dashboard(
+                          userId: currentUser.userId ?? '',
+                        ),
                       ),
-                    ),
-                  );
+                    );
+                  } else {
+                    print('User not logged in.');
+                  }
                 },
                 buttonText: 'Publish Recipe',
               ),

@@ -7,29 +7,18 @@ import 'package:recipe_app/views/client/create_recipe.dart';
 class AddRecipeFAB extends StatelessWidget {
   final String? currentScreen;
 
-  final name;
-
-  const AddRecipeFAB({
-    Key? key,
-    required this.name,
-    this.currentScreen,
-  }) : super(key: key);
+  const AddRecipeFAB({Key? key, this.currentScreen}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton.extended(
       onPressed: () {
-        // Implement the action you want when the FAB is pressed
         if (currentScreen == 'dashboard') {
           Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => CreateRecipe(name: name)));
+              context, MaterialPageRoute(builder: (context) => CreateRecipe()));
         } else if (currentScreen == 'admindashboard') {
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => AdminCreateRecipe(name: name)));
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => AdminCreateRecipe()));
         } else {
           // Handle other cases or do nothing if currentScreen is not provided
           debugPrint('Extended FAB pressed');

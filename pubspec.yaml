@@ -17,11 +17,8 @@ dependencies:
   mockito: ^5.4.2
   http: ^1.1.0
   file_picker: ^5.5.0
-  firebase_auth: ^4.14.1
-  firebase_core: ^2.23.0
-  cloud_firestore: ^4.13.2
-  firebase_database: ^10.3.5
   sqflite: ^2.3.0
+  path_provider: ^2.0.3
 
 dev_dependencies:
   flutter_test:
@@ -54,3 +51,4 @@ flutter:
     - assets/sign_up_logo.svg
     - assets/stopwatch.svg
     - assets/utensils.svg
+    - assets/db_recipe_app/db_recipe_app.db
