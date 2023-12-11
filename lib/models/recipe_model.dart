@@ -1,24 +1,26 @@
 class Recipe {
   int? id;
   String name;
+  String servings;
+  String preparationTime;
+  String
+      cookTime; // Changed to String to match the "cook_time" column in the database
   String ingredients;
   String procedure;
-  String? imageFileName; // Store the filename instead of the File object
-  String createdBy;
-  String servings;
-  String cookTime;
-  String preparationTime;
+  String?
+      image; // Changed to String to match the "image" column in the database
+  dynamic createdBy;
 
   Recipe({
     this.id,
     required this.name,
+    required this.servings,
+    required this.preparationTime,
+    required this.cookTime,
     required this.ingredients,
     required this.procedure,
-    required this.imageFileName,
+    this.image,
     required this.createdBy,
-    required this.servings,
-    required this.cookTime,
-    required this.preparationTime,
   });
 
   // Convert a map to a Recipe object
@@ -26,13 +28,13 @@ class Recipe {
     return Recipe(
       id: map['recipe_id'],
       name: map['recipe_name'],
+      servings: map['servings'],
+      preparationTime: map['preparation_time'],
+      cookTime: map['cook_time'],
       ingredients: map['ingredients'],
       procedure: map['procedure'],
-      imageFileName: map['imageFileName'],
+      image: map['image'],
       createdBy: map['created_by'],
-      servings: map['servings'],
-      cookTime: map['cookTime'],
-      preparationTime: map['preparationTime'],
     );
   }
 
@@ -41,13 +43,13 @@ class Recipe {
     return {
       'recipe_id': id,
       'recipe_name': name,
+      'servings': servings,
+      'preparation_time': preparationTime,
+      'cook_time': cookTime,
       'ingredients': ingredients,
       'procedure': procedure,
-      'imageFileName': imageFileName,
+      'image': image,
       'created_by': createdBy,
-      'servings': servings,
-      'cookTime': cookTime,
-      'preparationTime': preparationTime,
     };
   }
 }

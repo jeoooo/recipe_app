@@ -1,4 +1,5 @@
-// database_helper.dart
+// ignore_for_file: depend_on_referenced_packages
+
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -53,28 +54,27 @@ class DatabaseHelper {
     print('Creating "users" table...');
     await db.execute('''
       CREATE TABLE IF NOT EXISTS "users" (
-        "user_id" INTEGER NOT NULL,
+        "user_id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
         "full_name" TEXT NOT NULL,
         "email_address" TEXT NOT NULL,
         "password" TEXT NOT NULL,
-        "role" TEXT NOT NULL,
-        PRIMARY KEY("user_id" AUTOINCREMENT)
+        "role" TEXT NOT NULL
       )
     ''');
 
     print('Creating "recipes" table...');
     await db.execute('''
       CREATE TABLE IF NOT EXISTS "recipes" (
-        "recipe_id" INTEGER NOT NULL,
+        "recipe_id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
         "recipe_name" TEXT NOT NULL,
+        "servings" TEXT,
+        "preparation_time" INTEGER,
+        "cook_time" INTEGER,
         "ingredients" TEXT NOT NULL,
         "procedure" TEXT NOT NULL,
-        "created_by" TEXT NOT NULL,
-        "servings" TEXT NOT NULL,
-        "cookTime" TEXT NOT NULL,
-        "imageFileName" TEXT,
-        FOREIGN KEY("created_by") REFERENCES "users"("user_id"),
-        PRIMARY KEY("recipe_id" AUTOINCREMENT)
+        "image" REAL,
+        "created_by" INTEGER NOT NULL,
+        FOREIGN KEY("created_by") REFERENCES "users"("user_id")
       )
     ''');
   }

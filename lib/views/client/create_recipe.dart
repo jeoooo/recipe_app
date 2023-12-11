@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables
+// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables, use_build_context_synchronously
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -45,7 +45,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CookyAppBar(color: Color(0xffCB4036)),
+      appBar: CookyAppBar(color: const Color(0xffCB4036)),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(22.0),
@@ -57,7 +57,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 controller: recipeNameController,
                 formType: FormType.Normal,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               CustomForm(
@@ -65,7 +65,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 controller: servingsController,
                 formType: FormType.NumberInput,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               CustomForm(
@@ -73,7 +73,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 controller: preparationTimeController,
                 formType: FormType.Normal,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               CustomForm(
@@ -81,7 +81,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 controller: cookTimeController,
                 formType: FormType.Normal,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Row(
@@ -89,7 +89,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   ElevatedButton(
                     style: ButtonStyle(
                       backgroundColor:
-                          MaterialStatePropertyAll(Color(0xffCB4036)),
+                          MaterialStatePropertyAll(const Color(0xffCB4036)),
                     ),
                     onPressed: _pickFile,
                     child: Text(
@@ -97,7 +97,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       style: GoogleFonts.lexend(fontWeight: FontWeight.w400),
                     ),
                   ),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Text(
                       selectedFile?.path ?? 'No file selected',
@@ -106,7 +106,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                   ),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               CustomForm(
@@ -114,7 +114,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                 controller: ingredientController,
                 formType: FormType.MultiLineText,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               CustomForm(
@@ -137,7 +137,7 @@ class _CreateRecipeState extends State<CreateRecipe> {
                       cookTime: cookTimeController.text,
                       ingredients: ingredientController.text,
                       procedure: procedureController.text,
-                      imageFileName: filename,
+                      image: filename,
                       createdBy: currentUser.userId ?? '',
                     );
 

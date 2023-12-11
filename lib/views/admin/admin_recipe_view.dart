@@ -52,8 +52,8 @@ class _AdminRecipeViewState extends State<AdminRecipeView> {
                   Stack(
                     children: <Widget>[
                       Positioned.fill(
-                        child: Image.network(
-                          _recipe.imageFileName ?? 'https://fakeimg.pl/600x400',
+                        child: Image.asset(
+                          _recipe.image ?? 'https://fakeimg.pl/600x400',
                           fit: BoxFit.cover,
                         ),
                       ),

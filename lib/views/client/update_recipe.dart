@@ -53,7 +53,7 @@ class _RecipeViewState extends State<RecipeView> {
                     children: <Widget>[
                       Positioned.fill(
                         child: Image.network(
-                          _recipe.imageFileName ?? 'https://fakeimg.pl/600x400',
+                          _recipe.image ?? 'https://fakeimg.pl/600x400',
                           fit: BoxFit.cover,
                         ),
                       ),

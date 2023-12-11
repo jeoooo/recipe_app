@@ -1,82 +1,42 @@
-// ignore_for_file: prefer_const_constructors, prefer_typing_uninitialized_variables
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
 
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:recipe_app/controllers/recipe_controller.dart';
 import 'package:recipe_app/models/recipe_model.dart';
-import 'package:recipe_app/views/admin/admin_dashboard.dart';
-import 'package:recipe_app/widgets/button_widget.dart';
+import 'package:recipe_app/views/client/dashboard.dart';
+import 'package:recipe_app/widgets/CustomAlertDialog.dart';
 import 'package:recipe_app/widgets/cooky_app_bar.dart';
-import 'package:recipe_app/widgets/customForm_widget.dart';
 
-class AdminUpdateRecipe extends StatefulWidget {
+class AdminRecipeView extends StatefulWidget {
   final String name;
-  final int id; // Add id parameter
+  final int id;
 
-  const AdminUpdateRecipe({
-    Key? key,
-    required this.name,
-    required this.id, // Include id in the constructor
-  }) : super(key: key);
+  const AdminRecipeView({Key? key, required this.id, required this.name})
+      : super(key: key);
 
   @override
-  _AdminUpdateRecipeState createState() => _AdminUpdateRecipeState();
+  _AdminRecipeViewState createState() => _AdminRecipeViewState();
 }
 
-class _AdminUpdateRecipeState extends State<AdminUpdateRecipe> {
+class _AdminRecipeViewState extends State<AdminRecipeView> {
   final RecipeController _recipeController = RecipeController();
+  late Recipe _recipe;
 
-  TextEditingController recipeNameController = TextEditingController();
-  TextEditingController servingsController = TextEditingController();
-  TextEditingController preparationTimeController = TextEditingController();
-  TextEditingController ingredientController = TextEditingController();
-  TextEditingController procedureController = TextEditingController();
-  TextEditingController cookTimeController = TextEditingController();
-
-  File? selectedFile;
-
-  Future<void> _pickFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-
-    if (result != null) {
-      setState(() {
-        selectedFile = File(result.files.single.path!);
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecipeDetails();
   }
 
-  Future<void> _updateRecipe() async {
-    String recipeName = recipeNameController.text;
-    String servings = servingsController.text;
-    String preparationTime = preparationTimeController.text;
-    String ingredients = ingredientController.text;
-    String procedure = procedureController.text;
-    String cookTime = cookTimeController.text;
-
-    Recipe updatedRecipe = Recipe(
-      id: widget.id, // Use the provided id
-      name: recipeName,
-      ingredients: ingredients,
-      procedure: procedure,
-      imageFileName: selectedFile?.path ?? 'No file selected',
-      createdBy: widget.name,
-      servings: servings.toString(),
-      cookTime: preparationTime,
-      preparationTime: cookTime,
-    );
-
-    await _recipeController.updateRecipe(updatedRecipe);
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AdminDashboard(
-          userId: widget.name,
-        ),
-      ),
-    );
+  Future<void> _fetchRecipeDetails() async {
+    try {
+      _recipe = (await _recipeController.getRecipeById(widget.id))!;
+      setState(() {});
+    } catch (e) {
+      debugPrint("Error fetching recipe details: $e");
+    }
   }
 
   @override
@@ -84,75 +44,203 @@ class _AdminUpdateRecipeState extends State<AdminUpdateRecipe> {
     return Scaffold(
       appBar: CookyAppBar(color: Color(0xffCB4036)),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(22.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomForm(
-                textfieldName: 'Recipe Name',
-                controller: recipeNameController,
-                formType: FormType.Normal,
-              ),
-              SizedBox(height: 10),
-              CustomForm(
-                textfieldName: 'Number of Servings',
-                controller: servingsController,
-                formType: FormType.NumberInput,
-              ),
-              SizedBox(height: 10),
-              CustomForm(
-                textfieldName: 'Preparation Time',
-                controller: preparationTimeController,
-                formType: FormType.Normal,
-              ),
-              SizedBox(height: 10),
-              CustomForm(
-                textfieldName: 'Cook Time',
-                controller: cookTimeController,
-                formType: FormType.Normal,
-              ),
-              SizedBox(height: 10),
-              Row(
+        child: Column(
+          children: [
+            Card(
+              child: Column(
                 children: [
-                  ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all(Color(0xffCB4036)),
-                    ),
-                    onPressed: _pickFile,
-                    child: Text(
-                      'Upload Recipe Image',
-                      style: GoogleFonts.lexend(fontWeight: FontWeight.w400),
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Text(
-                      selectedFile?.path ?? 'No file selected',
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  Stack(
+                    children: <Widget>[
+                      Positioned.fill(
+                        child: Image.network(
+                          _recipe.image ?? 'https://fakeimg.pl/600x400',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      ElevatedButton.icon(
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.transparent),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(
+                          Icons.arrow_back,
+                          size: 24.0,
+                        ),
+                        label: Text(
+                          'Back to Feed',
+                          style: GoogleFonts.lexend(),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 180.0, left: 20.0),
+                        child: Text(
+                          _recipe.name ?? 'Recipe Name',
+                          style: GoogleFonts.paytoneOne(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 24,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 220.0, left: 20.0),
+                        child: Text(
+                          _recipe.createdBy ?? 'Created By',
+                          style: GoogleFonts.lexend(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            top: 250.0, left: 20.0, bottom: 16),
+                        child: Row(
+                          children: [
+                            SvgPicture.asset('assets/utensils.svg'),
+                            SizedBox(width: 8),
+                            Text(
+                              '${_recipe.servings ?? 0} Servings',
+                              style: GoogleFonts.lexend(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            SvgPicture.asset('assets/stopwatch.svg'),
+                            SizedBox(width: 8),
+                            Text(
+                              '${_recipe.cookTime ?? 0} min',
+                              style: GoogleFonts.lexend(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              SizedBox(height: 10),
-              CustomForm(
-                textfieldName: 'Ingredients',
-                controller: ingredientController,
-                formType: FormType.MultiLineText,
+            ),
+            SizedBox(height: 18),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  icon: Icon(Icons.edit),
+                  onPressed: () {
+                    // Add your logic for the edit button
+                  },
+                  label: Text(
+                    'Edit',
+                    style: GoogleFonts.lexend(),
+                  ),
+                ),
+                SizedBox(width: 16),
+                ElevatedButton.icon(
+                  icon: Icon(Icons.delete),
+                  onPressed: () async {
+                    bool? confirmDelete = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Confirm Deletion'),
+                          content: Text(
+                              'Are you sure you want to delete this item?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(
+                                    false); // Close the dialog and return false
+                              },
+                              child: Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(
+                                    true); // Close the dialog and return true
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+
+                    if (confirmDelete ?? false) {
+                      await _recipeController.deleteRecipe(widget.id);
+
+                      CustomAlertDialog.show(
+                        context: context,
+                        title: 'Deletion Successful',
+                        message: 'The item has been deleted.',
+                      );
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Dashboard(
+                            userId: widget.id.toString(),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  label: Text('Delete'),
+                )
+              ],
+            ),
+            SizedBox(height: 18),
+            Text(
+              'Ingredients',
+              style: GoogleFonts.paytoneOne(
+                fontWeight: FontWeight.w400,
+                fontSize: 24,
+                color: Color(0xffCB4036),
               ),
-              SizedBox(height: 10),
-              CustomForm(
-                textfieldName: 'Procedure',
-                controller: procedureController,
-                formType: FormType.MultiLineText,
+            ),
+            SizedBox(height: 18),
+            Text(
+              _recipe.ingredients ?? 'Ingredients data',
+              style: GoogleFonts.lexend(),
+            ),
+            SizedBox(height: 18),
+            Text(
+              'Procedure',
+              style: GoogleFonts.paytoneOne(
+                fontWeight: FontWeight.w400,
+                fontSize: 24,
+                color: Color(0xffCB4036),
               ),
-              Button(
-                onPressed: _updateRecipe,
-                buttonText: 'Update Recipe',
-              ),
-            ],
-          ),
+            ),
+            SizedBox(height: 18),
+            Text(
+              _recipe.procedure ?? 'Procedure data',
+              style: GoogleFonts.lexend(),
+            ),
+          ],
         ),
       ),
     );

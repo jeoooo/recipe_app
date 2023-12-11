@@ -52,10 +52,15 @@ class _OtherRecipeViewState extends State<OtherRecipeView> {
                   Stack(
                     children: <Widget>[
                       Positioned.fill(
-                        child: Image.network(
-                          _recipe.imageFileName ?? 'https://fakeimg.pl/600x400',
-                          fit: BoxFit.cover,
-                        ),
+                        child: _recipe.image != null
+                            ? Image.asset(
+                                'assets/images/${_recipe.image!}',
+                                fit: BoxFit.cover,
+                              )
+                            : Image.asset(
+                                'assets/images/placeholder_image.jpg',
+                                fit: BoxFit.cover,
+                              ),
                       ),
                       Positioned.fill(
                         child: Container(
